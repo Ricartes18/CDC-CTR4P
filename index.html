@@ -1,0 +1,7040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clark Tourism Ride 4 Pick up - Offline Event Pickup System</title>
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM & UTILITIES
+       Unified Palette: EE5C29 (Vibrant Orange), 1F4890 (Deep Navy Blue)
+       Sleek, High Contrast, Offline Compatible (No External Web Fonts/CDNs)
+       ========================================================================== */
+    :root {
+      --primary-navy: #1F4890;
+      --primary-navy-dark: #122C5A;
+      --primary-navy-light: #255BB0;
+      
+      --accent-orange: #EE5C29;
+      --accent-orange-hover: #D84A19;
+      --accent-orange-glow: rgba(238, 92, 41, 0.25);
+
+      /* Default Bright Light Mode */
+      --bg-dark: #F1F5F9;
+      --bg-pane: #FFFFFF;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8FAFC;
+      --bg-card-active: #EFF6FF;
+
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --text-dim: #64748B;
+
+      --border-subtle: #E2E8F0;
+      --border-highlight: rgba(238, 92, 41, 0.6);
+      
+      --status-claimed: #059669;
+      --status-claimed-bg: rgba(5, 150, 105, 0.12);
+      --status-pending: #EE5C29;
+      --status-pending-bg: rgba(238, 92, 41, 0.12);
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-pill: 9999px;
+
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+
+    /* Dark Mode Theme Switch */
+    body.dark-theme {
+      --bg-dark: #0B132B;
+      --bg-pane: #111C38;
+      --bg-card: #18284A;
+      --bg-card-hover: #20335D;
+      --bg-card-active: #273E70;
+
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      
+      --status-claimed: #10B981;
+      --status-claimed-bg: rgba(16, 185, 129, 0.12);
+
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    /* Reset & Core Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--primary-navy);
+      border-bottom: 2px solid var(--accent-orange);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow-md);
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      background: var(--accent-orange);
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.3rem;
+      padding: 6px 12px;
+      border-radius: var(--radius-md);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    
+    .live-sync-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #10B981;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+    }
+
+    .live-pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10B981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10B981;
+      animation: pulseGlow 1.8s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Stats Section */
+    .stats-container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-value.total { color: #ffffff; }
+    .stat-value.claimed { color: var(--status-claimed); }
+    .stat-value.pending { color: var(--accent-orange); }
+
+    .progress-bar-wrap {
+      width: 100px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-navy-light), var(--status-claimed));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Header Actions */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      outline: none;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--accent-orange);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-orange);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-orange-hover);
+    }
+
+    .btn-secondary {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-outline-danger {
+      background-color: transparent;
+      color: #f87171;
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    .btn-outline-danger:hover {
+      background-color: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 0.78rem;
+    }
+
+    /* Main App Body - Split Pane */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Left Sidebar */
+    aside.sidebar {
+      width: 320px;
+      background-color: var(--bg-pane);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 18px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .filter-label .hint-tag {
+      font-size: 0.65rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--text-dim);
+    }
+
+    /* Search Input Box */
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-dark);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 36px 10px 14px;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-fast);
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-orange);
+      box-shadow: 0 0 0 3px rgba(238, 92, 41, 0.25);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: none;
+      line-height: 1;
+      padding: 2px;
+    }
+
+    .search-clear-btn:hover {
+      color: #ffffff;
+    }
+
+    .keyboard-shortcut-hint {
+      position: absolute;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .search-quick-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .btn-search-action {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--accent-orange);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      background: var(--accent-orange);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(238, 92, 41, 0.3);
+    }
+
+    .btn-search-action:hover {
+      background: var(--accent-orange-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Chip Buttons & Toggles */
+    .chip-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip-btn {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      flex: 1;
+      text-align: center;
+      min-width: 65px;
+    }
+
+    .chip-btn:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+
+    .chip-btn.active {
+      background: var(--primary-navy);
+      border-color: var(--accent-orange);
+      color: #ffffff;
+    }
+
+    .chip-btn.active-orange {
+      background: var(--accent-orange);
+      border-color: var(--accent-orange);
+      color: #ffffff;
+    }
+
+    /* Group / Team Dropdown Selector */
+    .select-custom {
+      width: 100%;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .select-custom:focus {
+      border-color: var(--accent-orange);
+    }
+
+    /* Quick Range Helper Chips */
+    .quick-ranges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .quick-range-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quick-range-chip:hover {
+      background: var(--accent-orange);
+      color: #fff;
+      border-color: var(--accent-orange);
+    }
+
+    /* Keybind Cheat Sheet */
+    .cheat-sheet {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-top: auto;
+    }
+
+    .cheat-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-orange);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cheat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.75rem;
+    }
+
+    .cheat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+    }
+
+    kbd {
+      background: #1E293B;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.5);
+      color: #F1F5F9;
+      display: inline-block;
+      font-family: monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 1px 5px;
+    }
+
+    /* Right Main Content Pane */
+    main.content-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-dark);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Toolbar above Grid */
+    .grid-toolbar {
+      padding: 12px 24px;
+      background: var(--bg-pane);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .results-count {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .results-count strong {
+      color: var(--primary-navy);
+      font-weight: 800;
+    }
+    body.dark-theme .results-count strong {
+      color: #ffffff;
+    }
+
+    .toolbar-right-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .view-mode-toggle {
+      display: flex;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 2px;
+    }
+
+    .view-mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+
+    .view-mode-btn.active {
+      background: var(--primary-navy);
+      color: #ffffff;
+      border: 1px solid var(--accent-orange);
+    }
+
+    .sort-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sort-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Grid Area */
+    .grid-container-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      position: relative;
+      scroll-behavior: smooth;
+    }
+
+    .participant-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 16px;
+    }
+
+    /* Grouped View Section Styling */
+    .group-section {
+      margin-bottom: 24px;
+    }
+
+    .group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--primary-navy-dark);
+      border-left: 4px solid var(--accent-orange);
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+    }
+
+    .group-title-text {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-count-badge {
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-weight: 700;
+    }
+
+    /* Table View Styling */
+    .participant-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .participant-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    .participant-table th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--primary-navy);
+      color: #ffffff;
+      padding: 10px 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--accent-orange);
+      white-space: nowrap;
+    }
+
+    .participant-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .participant-table tbody tr {
+      transition: background-color var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .participant-table tbody tr:hover {
+      background-color: var(--bg-card-hover);
+    }
+
+    .participant-table tbody tr.focused {
+      background-color: var(--bg-card-active);
+      outline: 2px solid var(--accent-orange);
+      outline-offset: -2px;
+    }
+
+    .participant-table tbody tr.claimed {
+      background-color: rgba(16, 185, 129, 0.05);
+    }
+
+    .table-plate {
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: var(--text-main);
+    }
+
+    .table-size-badge {
+      display: inline-block;
+      background: var(--primary-navy);
+      color: #ffffff;
+      border: 1px solid var(--accent-orange);
+      padding: 3px 10px;
+      border-radius: var(--radius-sm);
+      font-weight: 900;
+      font-size: 0.9rem;
+      text-align: center;
+      min-width: 44px;
+    }
+
+    /* Participant Card */
+    .participant-card {
+      background-color: var(--bg-card);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      cursor: pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
+      outline: none;
+    }
+
+    .participant-card:hover {
+      background-color: var(--bg-card-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Focused State (Keyboard Nav) */
+    .participant-card.focused {
+      border-color: var(--accent-orange) !important;
+      box-shadow: 0 0 0 3px rgba(238, 92, 41, 0.4), var(--shadow-lg) !important;
+      background-color: var(--bg-card-active);
+    }
+
+    /* Claimed Card Styling */
+    .participant-card.claimed {
+      background-color: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+
+    .participant-card.claimed .card-plate {
+      color: var(--status-claimed);
+    }
+
+    /* Card Top Layout */
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .plate-number-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .plate-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+    }
+
+    .card-plate {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1;
+      color: var(--text-main);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* HUGE PROMINENT SIZE BADGE (Uniform Navy / Orange Brand Palette) */
+    .size-badge-large {
+      background-color: var(--primary-navy);
+      border: 2px solid var(--accent-orange);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-weight: 900;
+      font-size: 2.1rem;
+      line-height: 1;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      text-align: center;
+      min-width: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .participant-card.claimed .size-badge-large {
+      border-color: var(--status-claimed);
+    }
+
+    /* Card Details */
+    .card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .dist-badge {
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: var(--text-main);
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+    }
+    body.dark-theme .dist-badge {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .group-badge {
+      background: rgba(31, 72, 144, 0.08);
+      border: 1px solid rgba(31, 72, 144, 0.25);
+      color: #1F4890;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 0.72rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 160px;
+    }
+    body.dark-theme .group-badge {
+      background: rgba(31, 72, 144, 0.35);
+      border-color: rgba(43, 94, 168, 0.4);
+      color: #93C5FD;
+    }
+
+    /* Card Action / Toggle Buttons */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .participant-card.claimed .status-dot {
+      background-color: var(--status-claimed);
+      box-shadow: 0 0 8px var(--status-claimed);
+    }
+
+    .participant-card.prepared:not(.claimed) .status-dot {
+      background-color: #3B82F6;
+      box-shadow: 0 0 8px #3B82F6;
+    }
+
+    .participant-card:not(.claimed):not(.prepared) .status-dot {
+      background-color: var(--accent-orange);
+      box-shadow: 0 0 8px var(--accent-orange);
+    }
+
+    .card-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-status-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: var(--radius-pill);
+      font-size: 0.76rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+
+    /* Prepared Button Styling */
+    .btn-prepared-toggle {
+      background: rgba(59, 130, 246, 0.12);
+      color: #2563EB;
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    body.dark-theme .btn-prepared-toggle {
+      color: #60A5FA;
+    }
+    .btn-prepared-toggle:hover {
+      background: #3B82F6;
+      color: #ffffff;
+    }
+    .participant-card.prepared .btn-prepared-toggle {
+      background: rgba(59, 130, 246, 0.22);
+      color: #1D4ED8;
+      border-color: #3B82F6;
+    }
+    body.dark-theme .participant-card.prepared .btn-prepared-toggle {
+      color: #93C5FD;
+    }
+
+    /* Claimed Button Styling */
+    .btn-claim-toggle {
+      background: var(--status-pending-bg);
+      color: var(--accent-orange);
+      border-color: rgba(238, 92, 41, 0.4);
+    }
+    .btn-claim-toggle:hover {
+      background: var(--accent-orange);
+      color: #ffffff;
+    }
+    .participant-card.claimed .btn-claim-toggle {
+      background: var(--status-claimed-bg);
+      color: var(--status-claimed);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+    .participant-card.claimed .btn-claim-toggle:hover {
+      background: #10B981;
+      color: #ffffff;
+    }
+
+    .prepared-badge {
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #1D4ED8;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+    }
+    body.dark-theme .prepared-badge {
+      color: #93C5FD;
+    }
+
+    /* Checkmark SVG */
+    .checkmark-svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .participant-card.claimed .checkmark-svg {
+      transform: scale(1.2);
+    }
+
+    .claimed-timestamp {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      gap: 16px;
+    }
+
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      opacity: 0.4;
+      stroke: var(--accent-orange);
+    }
+
+    .empty-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .file-input-hidden {
+      display: none;
+    }
+
+    /* Sound indicator button */
+    .audio-toggle {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      border-radius: var(--radius-sm);
+    }
+
+    .audio-toggle:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Toast Notification System */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--bg-pane);
+      color: var(--text-main);
+      border-left: 4px solid var(--accent-orange);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+      animation: toastIn 0.25s ease forwards;
+    }
+
+    .toast.success { border-left-color: var(--status-claimed); }
+    .toast.info { border-left-color: var(--primary-navy-light); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile Responsive Simplification (< 768px) */
+    @media (max-width: 768px) {
+      body {
+        height: 100%;
+        height: 100dvh;
+        overflow: hidden;
+      }
+
+      /* Compact Header */
+      header {
+        padding: 8px 12px;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+
+      .brand-section {
+        gap: 8px;
+      }
+
+      .logo-badge {
+        font-size: 1rem;
+        padding: 4px 8px;
+      }
+
+      .brand-title {
+        font-size: 1.05rem;
+      }
+
+      .brand-subtitle {
+        display: none;
+      }
+
+      .stats-container {
+        padding: 4px 10px;
+        gap: 10px;
+      }
+
+      .stat-label {
+        font-size: 0.65rem;
+      }
+
+      .stat-value {
+        font-size: 0.95rem;
+      }
+
+      .progress-bar-wrap {
+        display: none;
+      }
+
+      .header-actions {
+        gap: 6px;
+      }
+
+      .header-actions .btn {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+      }
+
+      /* App Body & Sidebar */
+      .app-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      aside.sidebar {
+        width: 100%;
+        max-height: none;
+        padding: 10px 12px;
+        gap: 8px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+        background: var(--bg-pane);
+        z-index: 20;
+        flex-shrink: 0;
+      }
+
+      .filter-group.search-group-main {
+        gap: 6px;
+      }
+
+      .filter-group.search-group-main .filter-label {
+        display: none;
+      }
+
+      .search-input {
+        padding: 12px 36px 12px 14px;
+        font-size: 1.05rem;
+      }
+
+      .quick-ranges {
+        display: none;
+      }
+
+      .mobile-filter-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 8px 12px;
+        background: var(--bg-dark);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .mobile-filter-toggle-btn:hover, .mobile-filter-toggle-btn.active {
+        background: var(--primary-navy);
+        color: #ffffff;
+        border-color: var(--accent-orange);
+      }
+
+      /* Collapsible Filter Drawer */
+      .sidebar-filters-collapsible {
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border-subtle);
+        max-height: 45vh;
+        overflow-y: auto;
+      }
+
+      .sidebar-filters-collapsible.open {
+        display: flex !important;
+      }
+
+      /* Grid Toolbar on Mobile */
+      .grid-toolbar {
+        padding: 8px 12px;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        box-sizing: border-box;
+        gap: 8px;
+      }
+
+      .results-count {
+        font-size: 0.82rem;
+      }
+
+      .toolbar-right-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .sort-controls .sort-label {
+        display: none;
+      }
+
+      .select-custom {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+
+      .view-mode-toggle {
+        display: flex;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .view-mode-btn {
+        flex: 1;
+        padding: 6px 4px;
+        font-size: 0.72rem;
+        justify-content: center;
+        gap: 3px;
+        white-space: nowrap;
+      }
+
+      .sort-controls {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+      }
+
+      #sort-select {
+        width: 130px !important;
+        max-width: 130px;
+        font-size: 0.75rem;
+        padding: 5px 6px;
+        box-sizing: border-box;
+      }
+
+      /* Status Filter Chips 2-Column Grid on Mobile */
+      .chip-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        width: 100%;
+      }
+
+      .chip-btn {
+        min-width: 0;
+        flex: 1 1 calc(50% - 6px);
+        padding: 7px 8px;
+        font-size: 0.78rem;
+        box-sizing: border-box;
+      }
+
+      main.content-pane {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      /* Cards Grid on Mobile */
+      .grid-container-wrapper {
+        padding: 12px;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .participant-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .participant-card {
+        padding: 14px;
+        border-radius: var(--radius-md);
+      }
+
+      .card-name {
+        font-size: 1.1rem;
+      }
+
+      .size-badge-large {
+        font-size: 2rem;
+        min-width: 68px;
+        padding: 6px 12px;
+      }
+
+      .btn-status-toggle {
+        padding: 7px 14px;
+        font-size: 0.82rem;
+      }
+
+      /* Table View on Mobile */
+      .participant-table-wrapper {
+        border-radius: var(--radius-md);
+      }
+
+      .participant-table th {
+        padding: 8px 10px;
+        font-size: 0.7rem;
+      }
+
+      .participant-table td {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+
+      .participant-table .table-plate {
+        font-size: 0.95rem;
+      }
+
+      .participant-table .table-size-badge {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+        min-width: 36px;
+      }
+
+      .participant-table .btn-status-toggle {
+        padding: 4px 8px;
+        font-size: 0.74rem;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .mobile-filter-toggle-btn {
+        display: none !important;
+      }
+      .sidebar-filters-collapsible {
+        display: flex !important;
+        flex-direction: column;
+        gap: 18px;
+        height: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation & Stats Header -->
+  <header>
+    <div class="brand-section">
+      <div class="logo-badge">
+        <span>CTR4</span>
+      </div>
+      <div>
+        <h1 class="brand-title">Clark Tourism Ride 4 Pick up</h1>
+        <div class="brand-subtitle">Offline Race & Event Kit Pickup</div>
+      </div>
+    </div>
+
+    <!-- Live Statistics Counters -->
+    <div class="stats-container">
+      <div class="stat-item" title="Total Participants">
+        <span class="stat-label">Total</span>
+        <span class="stat-value total" id="stat-total">0</span>
+      </div>
+      <div style="width:1px; height:20px; background:rgba(255,255,255,0.1);"></div>
+      <div class="stat-item" title="Kits Prepared">
+        <span class="stat-label">Prepared</span>
+        <span class="stat-value prepared" id="stat-prepared" style="color: #3B82F6;">0</span>
+      </div>
+      <div style="width:1px; height:20px; background:rgba(255,255,255,0.1);"></div>
+      <div class="stat-item" title="Total Claimed">
+        <span class="stat-label">Claimed</span>
+        <span class="stat-value claimed" id="stat-claimed">0</span>
+      </div>
+      <div style="width:1px; height:20px; background:rgba(255,255,255,0.1);"></div>
+      <div class="stat-item" title="Pending Pickup">
+        <span class="stat-label">Pending</span>
+        <span class="stat-value pending" id="stat-pending">0</span>
+      </div>
+      <div class="progress-bar-wrap" title="Claim Progress">
+        <div class="progress-bar-fill" id="stat-progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Controls / Action Buttons -->
+    <div class="header-actions">
+      <!-- Theme Mode Toggle Button -->
+      <button class="audio-toggle" id="btn-theme-toggle" title="Toggle Light / Dark Mode">
+        <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
+
+      <button class="audio-toggle" id="btn-audio-toggle" title="Toggle audio click feedback">
+        <svg id="audio-icon-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+        <svg id="audio-icon-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+      </button>
+
+      <input type="file" id="csv-file-input" class="file-input-hidden" accept=".csv, .txt">
+      
+      <button class="btn btn-secondary" id="btn-import-csv">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        Import CSV
+      </button>
+
+      <button class="btn btn-primary" id="btn-export-csv">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Export CSV
+      </button>
+    </div>
+  </header>
+
+  <!-- App Body Split-Pane Layout -->
+  <div class="app-body">
+
+    <!-- Left Sidebar Control Pane -->
+    <aside class="sidebar">
+
+      <!-- Search Input (ALWAYS VISIBLE) -->
+      <div class="filter-group search-group-main">
+        <div class="filter-label">
+          <span>Search & Instant Claim</span>
+          <span class="hint-tag">Press Enter to Claim</span>
+        </div>
+        <div class="search-input-wrapper">
+          <input type="text" id="search-input" class="search-input" placeholder="Search Plate # or Name & press Enter..." autocomplete="off">
+          <button class="search-clear-btn" id="search-clear" title="Clear search">&times;</button>
+          <span class="keyboard-shortcut-hint" id="search-kbd-hint">/</span>
+        </div>
+        <div class="search-quick-actions" id="search-quick-actions">
+          <button type="button" class="btn-search-action" id="btn-search-mark-both" title="Mark top search result as Prepared & Claimed (Or press Enter key)">
+            ⚡ Mark Prepared & Claimed (Enter)
+          </button>
+        </div>
+        <div class="quick-ranges">
+          <span class="quick-range-chip" data-range="1-30">#1-30</span>
+          <span class="quick-range-chip" data-range="31-60">#31-60</span>
+          <span class="quick-range-chip" data-range="61-90">#61-90</span>
+          <span class="quick-range-chip" data-range="91-120">#91-120</span>
+        </div>
+      </div>
+
+      <!-- Mobile Filter Toggle Button (Mobile only) -->
+      <button class="mobile-filter-toggle-btn" id="btn-toggle-filters" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+        <span id="toggle-filter-text">Show Filters & Options</span>
+        <span class="filter-badge" id="mobile-filter-badge" style="display:none; background:var(--accent-orange); color:#fff; padding:2px 6px; border-radius:4px; font-size:0.7rem;">Active</span>
+      </button>
+
+      <!-- Collapsible Container for Secondary Filters -->
+      <div class="sidebar-filters-collapsible" id="sidebar-filters-drawer">
+
+        <!-- Group / Team Filter Dropdown -->
+        <div class="filter-group">
+          <div class="filter-label">Group / Batch Filter</div>
+          <select class="select-custom" id="group-filter-select">
+            <option value="ALL">All Groups & Batches</option>
+            <!-- Dynamically populated options -->
+          </select>
+        </div>
+
+        <!-- Distance Filter -->
+        <div class="filter-group">
+          <div class="filter-label">Distance Filter</div>
+          <div class="chip-grid">
+            <button class="chip-btn active" data-filter-type="dist" data-value="ALL">All</button>
+            <button class="chip-btn" data-filter-type="dist" data-value="30km">30km</button>
+            <button class="chip-btn" data-filter-type="dist" data-value="60km">60km</button>
+          </div>
+        </div>
+
+        <!-- Claim Status Filter -->
+        <div class="filter-group">
+          <div class="filter-label">Status Filter</div>
+          <div class="chip-grid">
+            <button class="chip-btn active" data-filter-type="status" data-value="ALL">All</button>
+            <button class="chip-btn" data-filter-type="status" data-value="PREPARED">Prepared</button>
+            <button class="chip-btn" data-filter-type="status" data-value="CLAIMED">Claimed</button>
+            <button class="chip-btn" data-filter-type="status" data-value="PENDING">Pending</button>
+          </div>
+        </div>
+
+        <!-- Jersey Size Quick Filter -->
+        <div class="filter-group">
+          <div class="filter-label">Jersey Size Filter</div>
+          <div class="chip-grid">
+            <button class="chip-btn active" data-filter-type="size" data-value="ALL">All Sizes</button>
+            <button class="chip-btn" data-filter-type="size" data-value="2XS">2XS</button>
+            <button class="chip-btn" data-filter-type="size" data-value="XS">XS</button>
+            <button class="chip-btn" data-filter-type="size" data-value="S">S</button>
+            <button class="chip-btn" data-filter-type="size" data-value="M">M</button>
+            <button class="chip-btn" data-filter-type="size" data-value="L">L</button>
+            <button class="chip-btn" data-filter-type="size" data-value="XL">XL</button>
+            <button class="chip-btn" data-filter-type="size" data-value="2XL">2XL</button>
+            <button class="chip-btn" data-filter-type="size" data-value="3XL">3XL</button>
+            <button class="chip-btn" data-filter-type="size" data-value="4XL">4XL</button>
+            <button class="chip-btn" data-filter-type="size" data-value="5XL">5XL</button>
+          </div>
+        </div>
+
+        <!-- Keybind Cheat Sheet Panel -->
+        <div class="cheat-sheet">
+          <div class="cheat-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"></path></svg>
+            Keyboard Controls
+          </div>
+          <div class="cheat-list">
+            <div class="cheat-item"><span>Focus Search</span> <kbd>/</kbd></div>
+            <div class="cheat-item"><span>Navigate Cards</span> <kbd>&uparrow;</kbd> <kbd>&downarrow;</kbd> or <kbd>&leftarrow;</kbd> <kbd>&rightarrow;</kbd></div>
+            <div class="cheat-item"><span>Toggle Prepared</span> <kbd>P</kbd></div>
+            <div class="cheat-item"><span>Toggle Claimed</span> <kbd>Space</kbd></div>
+            <div class="cheat-item"><span>Mark BOTH (Prepare & Claim)</span> <kbd>Enter</kbd></div>
+            <div class="cheat-item"><span>Clear Search</span> <kbd>Esc</kbd></div>
+          </div>
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- Right Grid Main Display -->
+    <main class="content-pane">
+
+      <!-- Secondary Toolbar / Sorting & Grouping -->
+      <div class="grid-toolbar">
+        <div class="results-count" id="results-count">
+          Showing <strong>0</strong> participants
+        </div>
+
+        <div class="toolbar-right-controls">
+          <!-- View Layout Mode Toggle: Flat Grid vs Grouped Sections vs Table List -->
+          <div class="view-mode-toggle">
+            <button class="view-mode-btn active" id="btn-view-grid" title="Grid View">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              Grid View
+            </button>
+            <button class="view-mode-btn" id="btn-view-grouped" title="Grouped View">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              Grouped View
+            </button>
+            <button class="view-mode-btn" id="btn-view-table" title="Table List View">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              Table View
+            </button>
+          </div>
+
+          <div class="sort-controls">
+            <span class="sort-label">Sort By:</span>
+            <select class="select-custom" id="sort-select" style="width: 170px;">
+              <option value="plate-asc">Plate # (Lowest First)</option>
+              <option value="plate-desc">Plate # (Highest First)</option>
+              <option value="group">Group / Team Name</option>
+              <option value="size">Jersey Size (XS &rarr; 2XL)</option>
+              <option value="name">Participant Name</option>
+              <option value="status-pending">Status (Pending First)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Participants Display Container -->
+      <div class="grid-container-wrapper" id="grid-scroll-wrapper">
+        <div id="display-container">
+          <!-- Dynamically populated flat grid or grouped sections -->
+        </div>
+
+        <!-- Empty State Container -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+          <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+          <div class="empty-title" id="empty-title">No Participants Found</div>
+          <p id="empty-desc">Try clearing filters or importing a participant CSV file.</p>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    /**
+     * PickupSorter Pro Core Application Logic
+     * Single-File Standalone & Offline Architecture
+     */
+
+    const STORAGE_KEY = 'clark_tourism_ride4_participants_v3';
+    
+    // State Management
+    let state = {
+      participants: [],
+      filteredIndices: [],
+      focusedIndex: 0,
+      viewMode: 'GRID', // 'GRID' or 'GROUPED'
+      darkTheme: false,
+      filters: {
+        search: '',
+        group: 'ALL',
+        dist: 'ALL',
+        status: 'ALL',
+        size: 'ALL'
+      },
+      sortBy: 'plate-asc',
+      audioEnabled: true
+    };
+
+    // DOM References
+    const DOM = {
+      searchInput: document.getElementById('search-input'),
+      searchClear: document.getElementById('search-clear'),
+      searchKbdHint: document.getElementById('search-kbd-hint'),
+      btnSearchMarkBoth: document.getElementById('btn-search-mark-both'),
+      groupFilterSelect: document.getElementById('group-filter-select'),
+      btnToggleFilters: document.getElementById('btn-toggle-filters'),
+      sidebarFiltersDrawer: document.getElementById('sidebar-filters-drawer'),
+      toggleFilterText: document.getElementById('toggle-filter-text'),
+      mobileFilterBadge: document.getElementById('mobile-filter-badge'),
+      displayContainer: document.getElementById('display-container'),
+      gridScroll: document.getElementById('grid-scroll-wrapper'),
+      emptyState: document.getElementById('empty-state'),
+      emptyTitle: document.getElementById('empty-title'),
+      emptyDesc: document.getElementById('empty-desc'),
+      statTotal: document.getElementById('stat-total'),
+      statPrepared: document.getElementById('stat-prepared'),
+      statClaimed: document.getElementById('stat-claimed'),
+      statPending: document.getElementById('stat-pending'),
+      statProgressFill: document.getElementById('stat-progress-fill'),
+      resultsCount: document.getElementById('results-count'),
+      sortSelect: document.getElementById('sort-select'),
+      btnViewGrid: document.getElementById('btn-view-grid'),
+      btnViewGrouped: document.getElementById('btn-view-grouped'),
+      btnViewTable: document.getElementById('btn-view-table'),
+      fileInput: document.getElementById('csv-file-input'),
+      btnImport: document.getElementById('btn-import-csv'),
+      btnExport: document.getElementById('btn-export-csv'),
+      btnAudioToggle: document.getElementById('btn-audio-toggle'),
+      audioIconOn: document.getElementById('audio-icon-on'),
+      audioIconOff: document.getElementById('audio-icon-off'),
+      btnThemeToggle: document.getElementById('btn-theme-toggle'),
+      themeIconSun: document.getElementById('theme-icon-sun'),
+      themeIconMoon: document.getElementById('theme-icon-moon'),
+      toastContainer: document.getElementById('toast-container')
+    };
+
+    // Synthesized Web Audio Feedback
+    let audioCtx = null;
+
+    function playSound(type) {
+      if (!state.audioEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        if (type === 'claim') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'unclaim') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(220, now + 0.08);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        }
+      } catch (e) {
+        console.warn('Audio error:', e);
+      }
+    }
+
+    // Default Demo Dataset with Groups / Batches
+    const DEMO_PARTICIPANTS = [
+  {
+    "id": 1,
+    "plate": "30K-001",
+    "name": "Irineo Camacho Tuliao",
+    "dist": "30km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 2,
+    "plate": "30K-002",
+    "name": "Maria Elena Cruz Liongson",
+    "dist": "30km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 3,
+    "plate": "30K-003",
+    "name": "Jose Guiao Arcega",
+    "dist": "30km",
+    "size": "3XL",
+    "team": "BSCC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 4,
+    "plate": "30K-004",
+    "name": "Flordeliza Patdu Arcega",
+    "dist": "30km",
+    "size": "M",
+    "team": "BSCC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 5,
+    "plate": "30K-005",
+    "name": "Jestoni Regino Patdu Arcega",
+    "dist": "30km",
+    "size": "3XL",
+    "team": "BSCC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 6,
+    "plate": "30K-006",
+    "name": "Maricel Pineda",
+    "dist": "30km",
+    "size": "S",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 7,
+    "plate": "30K-007",
+    "name": "Jefferson Sarmiento",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 8,
+    "plate": "30K-008",
+    "name": "Arnold Flores",
+    "dist": "30km",
+    "size": "M",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 9,
+    "plate": "30K-009",
+    "name": "Jonas Sarmiento",
+    "dist": "30km",
+    "size": "M",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 10,
+    "plate": "30K-010",
+    "name": "Resty Dizon",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 11,
+    "plate": "30K-011",
+    "name": "Enrique Manalili",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 12,
+    "plate": "30K-012",
+    "name": "Myla Pangilinan",
+    "dist": "30km",
+    "size": "M",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 13,
+    "plate": "30K-013",
+    "name": "Ligaya Guevarra",
+    "dist": "30km",
+    "size": "XS",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 14,
+    "plate": "30K-014",
+    "name": "Jaime Enriquez",
+    "dist": "30km",
+    "size": "M",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 15,
+    "plate": "30K-015",
+    "name": "Lanie Lampa",
+    "dist": "30km",
+    "size": "S",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 16,
+    "plate": "30K-016",
+    "name": "Edwin Napo",
+    "dist": "30km",
+    "size": "M",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 17,
+    "plate": "30K-019",
+    "name": "Mariclaire D Libas",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 18,
+    "plate": "30K-020",
+    "name": "Rolando Evaristo",
+    "dist": "30km",
+    "size": "L",
+    "team": "Brothers and Sisters Cycling Club (BSCC)",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 19,
+    "plate": "30K-021",
+    "name": "Dorivic B Lacambra",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 20,
+    "plate": "30K-024",
+    "name": "Elrick Dave Tubig",
+    "dist": "30km",
+    "size": "M",
+    "team": "Dave N Dei",
+    "claimed": false
+  },
+  {
+    "id": 21,
+    "plate": "30K-025",
+    "name": "Andrei Enzo Esguerra Tubig",
+    "dist": "30km",
+    "size": "S",
+    "team": "Dave N Dei",
+    "claimed": false
+  },
+  {
+    "id": 22,
+    "plate": "30K-026",
+    "name": "Arrah Andrea Ponce",
+    "dist": "30km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 23,
+    "plate": "30K-027",
+    "name": "Wilfredo Balerite Estepa",
+    "dist": "30km",
+    "size": "M",
+    "team": "Wilfredo",
+    "claimed": false
+  },
+  {
+    "id": 24,
+    "plate": "30K-028",
+    "name": "Jesus Bengua De Leon",
+    "dist": "30km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 25,
+    "plate": "30K-029",
+    "name": "Jairus Garcia",
+    "dist": "30km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 26,
+    "plate": "30K-030",
+    "name": "Patricia Mapue",
+    "dist": "30km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 27,
+    "plate": "30K-031",
+    "name": "Noel Ilao",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 28,
+    "plate": "30K-032",
+    "name": "Cassius Kobe Miranda Rocha",
+    "dist": "30km",
+    "size": "M",
+    "team": "ROCHA BIKE FAMILY",
+    "claimed": false
+  },
+  {
+    "id": 29,
+    "plate": "30K-033",
+    "name": "GEORGE TOLENTINO ROCHA",
+    "dist": "30km",
+    "size": "M",
+    "team": "ROCHA BIKE FAMILY",
+    "claimed": false
+  },
+  {
+    "id": 30,
+    "plate": "30K-034",
+    "name": "Mary Glen Miranda Rocha",
+    "dist": "30km",
+    "size": "S",
+    "team": "ROCHA BIKE FAMILY",
+    "claimed": false
+  },
+  {
+    "id": 31,
+    "plate": "30K-035",
+    "name": "Louise Jacob Miranda Rocha",
+    "dist": "30km",
+    "size": "S",
+    "team": "ROCHA BIKE FAMILY",
+    "claimed": false
+  },
+  {
+    "id": 32,
+    "plate": "30K-036",
+    "name": "Christian Miranda",
+    "dist": "30km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 33,
+    "plate": "30K-037",
+    "name": "Beverly Monungolh",
+    "dist": "30km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 34,
+    "plate": "30K-038",
+    "name": "Noemi Genova Ramos",
+    "dist": "30km",
+    "size": "S",
+    "team": "Genova",
+    "claimed": false
+  },
+  {
+    "id": 35,
+    "plate": "30K-039",
+    "name": "Helen Serrano",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 36,
+    "plate": "30K-046",
+    "name": "Geraldine Rosero Manalili",
+    "dist": "30km",
+    "size": "S",
+    "team": "Geraldine",
+    "claimed": false
+  },
+  {
+    "id": 37,
+    "plate": "30K-047",
+    "name": "JD Binuya",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Complimentary",
+    "claimed": false
+  },
+  {
+    "id": 38,
+    "plate": "30K-048",
+    "name": "Johann L Gonzales",
+    "dist": "30km",
+    "size": "S",
+    "team": "BCR",
+    "claimed": false
+  },
+  {
+    "id": 39,
+    "plate": "30K-049",
+    "name": "Lenard S Castillo",
+    "dist": "30km",
+    "size": "M",
+    "team": "BCR",
+    "claimed": false
+  },
+  {
+    "id": 40,
+    "plate": "30K-050",
+    "name": "Edsel B Velasco",
+    "dist": "30km",
+    "size": "S",
+    "team": "BCR",
+    "claimed": false
+  },
+  {
+    "id": 41,
+    "plate": "30K-051",
+    "name": "Rey C Marasigan",
+    "dist": "30km",
+    "size": "L",
+    "team": "BCR",
+    "claimed": false
+  },
+  {
+    "id": 42,
+    "plate": "30K-052",
+    "name": "Rainan G Gloria",
+    "dist": "30km",
+    "size": "L",
+    "team": "BCR",
+    "claimed": false
+  },
+  {
+    "id": 43,
+    "plate": "30K-053",
+    "name": "Mark Chavez",
+    "dist": "30km",
+    "size": "S",
+    "team": "Team Chavez",
+    "claimed": false
+  },
+  {
+    "id": 44,
+    "plate": "30K-054",
+    "name": "Norman Joseph Galindo Galeon",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 45,
+    "plate": "30K-057",
+    "name": "Marisol Benalayo Que",
+    "dist": "30km",
+    "size": "M",
+    "team": "Que's",
+    "claimed": false
+  },
+  {
+    "id": 46,
+    "plate": "30K-058",
+    "name": "Heinrich Lim Que",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Que's",
+    "claimed": false
+  },
+  {
+    "id": 47,
+    "plate": "30K-059",
+    "name": "Maria Leonora A Villanueva",
+    "dist": "30km",
+    "size": "XS",
+    "team": "Weekend Cycler",
+    "claimed": false
+  },
+  {
+    "id": 48,
+    "plate": "30K-060",
+    "name": "Wylyne P Naticho",
+    "dist": "30km",
+    "size": "S",
+    "team": "Weekend Cycler",
+    "claimed": false
+  },
+  {
+    "id": 49,
+    "plate": "30K-061",
+    "name": "Jomar L Benedicto",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 50,
+    "plate": "30K-065",
+    "name": "Nelson P Valdez",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Team Valdez",
+    "claimed": false
+  },
+  {
+    "id": 51,
+    "plate": "30K-066",
+    "name": "Christopher Calub Carolino",
+    "dist": "30km",
+    "size": "3XL",
+    "team": "None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 52,
+    "plate": "30K-067",
+    "name": "Christian Calub Fabros",
+    "dist": "30km",
+    "size": "M",
+    "team": "None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 53,
+    "plate": "30K-073",
+    "name": "Roy Van C Morales",
+    "dist": "30km",
+    "size": "XL",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 54,
+    "plate": "30K-074",
+    "name": "Cleo Roda C. Nodado",
+    "dist": "30km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 55,
+    "plate": "30K-077",
+    "name": "Regie Tubay Tamares",
+    "dist": "30km",
+    "size": "L",
+    "team": "ZHUB",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 56,
+    "plate": "30K-078",
+    "name": "Kristelle Tamares",
+    "dist": "30km",
+    "size": "L",
+    "team": "ZHUB",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 57,
+    "plate": "30K-081",
+    "name": "Alejandro A Serran",
+    "dist": "30km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 58,
+    "plate": "30K-082",
+    "name": "Alejandro P Serran",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 59,
+    "plate": "30K-085",
+    "name": "Anne Ocampo",
+    "dist": "30km",
+    "size": "M",
+    "team": "Team Ocampo",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 60,
+    "plate": "30K-086",
+    "name": "Michaella Angelica Gozun David",
+    "dist": "30km",
+    "size": "L",
+    "team": "David05 Tandem",
+    "claimed": false
+  },
+  {
+    "id": 61,
+    "plate": "30K-087",
+    "name": "Milo Miguel Tullao David",
+    "dist": "30km",
+    "size": "3XL",
+    "team": "David05 Tandem",
+    "claimed": false
+  },
+  {
+    "id": 62,
+    "plate": "30K-089",
+    "name": "Alexander Julius Aguila Diaz",
+    "dist": "30km",
+    "size": "L",
+    "team": "DIAZ CYCLING CLUB",
+    "claimed": false
+  },
+  {
+    "id": 63,
+    "plate": "30K-090",
+    "name": "Vince Julius Aguila Diaz",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "DIAZ CYCLING CLUB",
+    "claimed": false
+  },
+  {
+    "id": 64,
+    "plate": "30K-092",
+    "name": "Christy D Deseo",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 65,
+    "plate": "30K-093",
+    "name": "Rogelio Caburog Deseo",
+    "dist": "30km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 66,
+    "plate": "30K-094",
+    "name": "Manuel Sicam Jr",
+    "dist": "30km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 67,
+    "plate": "30K-097",
+    "name": "Noelle Marinas",
+    "dist": "30km",
+    "size": "S",
+    "team": "Team Drawing",
+    "claimed": false
+  },
+  {
+    "id": 68,
+    "plate": "30K-098",
+    "name": "Sol Marinas",
+    "dist": "30km",
+    "size": "L",
+    "team": "Team Drawing",
+    "claimed": false
+  },
+  {
+    "id": 69,
+    "plate": "30K-099",
+    "name": "Seth Marinas",
+    "dist": "30km",
+    "size": "M",
+    "team": "Team Drawing",
+    "claimed": false
+  },
+  {
+    "id": 70,
+    "plate": "30K-100",
+    "name": "Wilson Marinas",
+    "dist": "30km",
+    "size": "S",
+    "team": "Team Drawing",
+    "claimed": false
+  },
+  {
+    "id": 71,
+    "plate": "30K-101",
+    "name": "Sharlene To",
+    "dist": "30km",
+    "size": "S",
+    "team": "Team Drawing",
+    "claimed": false
+  },
+  {
+    "id": 72,
+    "plate": "30K-102",
+    "name": "Aldous Bryan Lazo Borre",
+    "dist": "30km",
+    "size": "L",
+    "team": "aldous",
+    "claimed": false
+  },
+  {
+    "id": 73,
+    "plate": "30K-103",
+    "name": "Michael Abajon",
+    "dist": "30km",
+    "size": "L",
+    "team": "Abajon Family",
+    "claimed": false
+  },
+  {
+    "id": 74,
+    "plate": "30K-104",
+    "name": "Mhelvin F Abajon",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Abajon Family",
+    "claimed": false
+  },
+  {
+    "id": 75,
+    "plate": "30K-105",
+    "name": "Federico Jr Turgano Marquez",
+    "dist": "30km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 76,
+    "plate": "30K-106",
+    "name": "Ronaldo Puyawan Gabriel",
+    "dist": "30km",
+    "size": "M",
+    "team": "None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 77,
+    "plate": "30K-107",
+    "name": "Adrian Paul V del Rosario",
+    "dist": "30km",
+    "size": "M",
+    "team": "Team dR",
+    "claimed": false
+  },
+  {
+    "id": 78,
+    "plate": "30K-108",
+    "name": "Alexander Caleb E del Rosario",
+    "dist": "30km",
+    "size": "S",
+    "team": "Team dR",
+    "claimed": false
+  },
+  {
+    "id": 79,
+    "plate": "30K-109",
+    "name": "Charles Andrei E del Rosario",
+    "dist": "30km",
+    "size": "XS",
+    "team": "Team dR",
+    "claimed": false
+  },
+  {
+    "id": 80,
+    "plate": "30K-110",
+    "name": "Armando H Ramos",
+    "dist": "30km",
+    "size": "L",
+    "team": "Markeso",
+    "claimed": false
+  },
+  {
+    "id": 81,
+    "plate": "30K-111",
+    "name": "Kendrick Andrei Umali Marquez",
+    "dist": "30km",
+    "size": "M",
+    "team": "Markeso",
+    "claimed": false
+  },
+  {
+    "id": 82,
+    "plate": "30K-118",
+    "name": "Francis jan paolo R. Lozano",
+    "dist": "30km",
+    "size": "L",
+    "team": "Lozano",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 83,
+    "plate": "30K-119",
+    "name": "Charlton P Lansangan",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 84,
+    "plate": "30K-120",
+    "name": "Ronalin B Lozano",
+    "dist": "30km",
+    "size": "M",
+    "team": "Lozano",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 85,
+    "plate": "30K-121",
+    "name": "Francisco Bautista De Guzman",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 86,
+    "plate": "30K-122",
+    "name": "Jerol De Los Santos Almoradie",
+    "dist": "30km",
+    "size": "S",
+    "team": "Doc Jerol",
+    "claimed": false
+  },
+  {
+    "id": 87,
+    "plate": "30K-125",
+    "name": "Kendrick Cornelio De la Cruz",
+    "dist": "30km",
+    "size": "L",
+    "team": "Father & Son Dela Cruz",
+    "claimed": false
+  },
+  {
+    "id": 88,
+    "plate": "30K-126",
+    "name": "Royce Jr. Sun De la Cruz",
+    "dist": "30km",
+    "size": "3XL",
+    "team": "Father & Son Dela Cruz",
+    "claimed": false
+  },
+  {
+    "id": 89,
+    "plate": "30K-131",
+    "name": "Rhiana Chloie F Bermudez",
+    "dist": "30km",
+    "size": "L",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 90,
+    "plate": "30K-132",
+    "name": "Jerome C Cartagena",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 91,
+    "plate": "30K-133",
+    "name": "Al glenn G Pangilinan",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 92,
+    "plate": "30K-134",
+    "name": "Gian Franco T Dayrit",
+    "dist": "30km",
+    "size": "L",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 93,
+    "plate": "30K-135",
+    "name": "Wolvarine M Lacanlale",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 94,
+    "plate": "30K-136",
+    "name": "Ronaldo O Bermudez",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 95,
+    "plate": "30K-137",
+    "name": "Jeson M Consumo",
+    "dist": "30km",
+    "size": "L",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 96,
+    "plate": "30K-138",
+    "name": "Arnulfo O Ebreo",
+    "dist": "30km",
+    "size": "M",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 97,
+    "plate": "30K-139",
+    "name": "Iron Martel P Candol",
+    "dist": "30km",
+    "size": "L",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 98,
+    "plate": "30K-140",
+    "name": "Mark Anthony Senapilo",
+    "dist": "30km",
+    "size": "M",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 99,
+    "plate": "30K-141",
+    "name": "Marfred D Pelejo",
+    "dist": "30km",
+    "size": "L",
+    "team": "Bangko Sentral ng Pilipinas(BSP)",
+    "claimed": false
+  },
+  {
+    "id": 100,
+    "plate": "30K-142",
+    "name": "Sylvester S Cruz",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 101,
+    "plate": "30K-144",
+    "name": "Jerwin B Alimuin",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 102,
+    "plate": "30K-145",
+    "name": "Foster Rains",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 103,
+    "plate": "30K-148",
+    "name": "Lance Mathew Calilung Garcia",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 104,
+    "plate": "30K-150",
+    "name": "Judith Chebat Manipol",
+    "dist": "30km",
+    "size": "S",
+    "team": "Manipol",
+    "claimed": false
+  },
+  {
+    "id": 105,
+    "plate": "30K-151",
+    "name": "Edward Carino Manipol",
+    "dist": "30km",
+    "size": "M",
+    "team": "Manipol",
+    "claimed": false
+  },
+  {
+    "id": 106,
+    "plate": "30K-154",
+    "name": "Sonny J Dayrit Sunga",
+    "dist": "30km",
+    "size": "L",
+    "team": "Sunga",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 107,
+    "plate": "30K-157",
+    "name": "Melvin De la torre Abuyog",
+    "dist": "30km",
+    "size": "XS",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 108,
+    "plate": "30K-158",
+    "name": "Darwin L Gutierrez",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 109,
+    "plate": "30K-159",
+    "name": "MARCUS JERIC AGAGAD LAO",
+    "dist": "30km",
+    "size": "L",
+    "team": "MJ",
+    "claimed": false
+  },
+  {
+    "id": 110,
+    "plate": "30K-166",
+    "name": "Patrick John De Guzman Pe",
+    "dist": "30km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 111,
+    "plate": "30K-167",
+    "name": "Ane Catherine Tirados Geronimo",
+    "dist": "30km",
+    "size": "XS",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 112,
+    "plate": "30K-168",
+    "name": "Jason Christian Andrade",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 113,
+    "plate": "30K-169",
+    "name": "Stephen Francis Jay Panican Sunga",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 114,
+    "plate": "30K-170",
+    "name": "Joey N. Paras",
+    "dist": "30km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 115,
+    "plate": "30K-172",
+    "name": "Kathleen Anne S Perez",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 116,
+    "plate": "30K-178",
+    "name": "Christian Guzman Jade Panlaqui",
+    "dist": "30km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 117,
+    "plate": "30K-179",
+    "name": "Dwen O Geronimo",
+    "dist": "30km",
+    "size": "S",
+    "team": "Solid North Bikers",
+    "claimed": false
+  },
+  {
+    "id": 118,
+    "plate": "30K-180",
+    "name": "ESTEBAN PANGDAO SUYAM",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Solid North Bikers",
+    "claimed": false
+  },
+  {
+    "id": 119,
+    "plate": "30K-181",
+    "name": "FERDINAND VALDEZ CAMAT",
+    "dist": "30km",
+    "size": "2XL",
+    "team": "Solid North Bikers",
+    "claimed": false
+  },
+  {
+    "id": 120,
+    "plate": "30K-182",
+    "name": "Roland J Portes",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 121,
+    "plate": "30K-183",
+    "name": "Alvin Enguero",
+    "dist": "30km",
+    "size": "3XL",
+    "team": "Team Enguero",
+    "claimed": false
+  },
+  {
+    "id": 122,
+    "plate": "30K-184",
+    "name": "Alejandro Jose Mapue",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 123,
+    "plate": "30K-185",
+    "name": "Julius Caesar O Javier",
+    "dist": "30km",
+    "size": "M",
+    "team": "Solid North Bikers",
+    "claimed": false
+  },
+  {
+    "id": 124,
+    "plate": "30K-186",
+    "name": "Brien Joseph Ramirez Damian",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 125,
+    "plate": "30K-187",
+    "name": "CHRISTIAN GIO HIPONA SEMBRANO",
+    "dist": "30km",
+    "size": "XL",
+    "team": "ROB",
+    "claimed": false
+  },
+  {
+    "id": 126,
+    "plate": "30K-188",
+    "name": "ADRIAN ALAN VINLUAN VILLACORTE",
+    "dist": "30km",
+    "size": "XL",
+    "team": "ROB",
+    "claimed": false
+  },
+  {
+    "id": 127,
+    "plate": "30K-189",
+    "name": "Glenn Tenorio Miranda",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Buensons",
+    "claimed": false
+  },
+  {
+    "id": 128,
+    "plate": "30K-190",
+    "name": "Gerald Tenorio Miranda",
+    "dist": "30km",
+    "size": "3XL",
+    "team": "Buensons",
+    "claimed": false
+  },
+  {
+    "id": 129,
+    "plate": "30K-191",
+    "name": "Buenaventura Santos Miranda",
+    "dist": "30km",
+    "size": "XL",
+    "team": "Buensons",
+    "claimed": false
+  },
+  {
+    "id": 130,
+    "plate": "30K-192",
+    "name": "Ej Lacanlale",
+    "dist": "30km",
+    "size": "3XL",
+    "team": "Complimentary",
+    "claimed": false
+  },
+  {
+    "id": 131,
+    "plate": "60K-001",
+    "name": "Alfred Derick Cayanan Wong",
+    "dist": "60km",
+    "size": "3XL",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 132,
+    "plate": "60K-002",
+    "name": "Aldrian Villasor Blanquera",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Aldrian",
+    "claimed": false
+  },
+  {
+    "id": 133,
+    "plate": "60K-003",
+    "name": "Dante Manalo Quizon",
+    "dist": "60km",
+    "size": "L",
+    "team": "Quizon",
+    "claimed": false
+  },
+  {
+    "id": 134,
+    "plate": "60K-004",
+    "name": "Louie Quizon Layug",
+    "dist": "60km",
+    "size": "M",
+    "team": "Quizon",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 135,
+    "plate": "60K-005",
+    "name": "Jenamae Baliong Lugatiman",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 136,
+    "plate": "60K-006",
+    "name": "Russel Michael Garcia",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 137,
+    "plate": "60K-007",
+    "name": "Rommel M Pamintuan",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 138,
+    "plate": "60K-008",
+    "name": "Jeremy L Tuliao",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 139,
+    "plate": "60K-009",
+    "name": "Ashley Tuliao Garcia",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 140,
+    "plate": "60K-010",
+    "name": "Dred Almero",
+    "dist": "60km",
+    "size": "M",
+    "team": "Decadens",
+    "claimed": false
+  },
+  {
+    "id": 141,
+    "plate": "60K-011",
+    "name": "Ejay Talolong",
+    "dist": "60km",
+    "size": "L",
+    "team": "Decadens",
+    "claimed": false
+  },
+  {
+    "id": 142,
+    "plate": "60K-012",
+    "name": "Del Refrea",
+    "dist": "60km",
+    "size": "S",
+    "team": "Decadens",
+    "claimed": false
+  },
+  {
+    "id": 143,
+    "plate": "60K-013",
+    "name": "Chi Almero",
+    "dist": "60km",
+    "size": "M",
+    "team": "Decadens",
+    "claimed": false
+  },
+  {
+    "id": 144,
+    "plate": "60K-014",
+    "name": "Cielo Fajardo",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Decadens",
+    "claimed": false
+  },
+  {
+    "id": 145,
+    "plate": "60K-015",
+    "name": "Jani Fajardo",
+    "dist": "60km",
+    "size": "L",
+    "team": "Decadens",
+    "claimed": false
+  },
+  {
+    "id": 146,
+    "plate": "60K-016",
+    "name": "Clydeson De Salit Ramos",
+    "dist": "60km",
+    "size": "XL",
+    "team": "BSCC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 147,
+    "plate": "60K-017",
+    "name": "Guiller Lee Padre Ogoy",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 148,
+    "plate": "60K-018",
+    "name": "Phillipe John Gutierrez Balala",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 149,
+    "plate": "60K-019",
+    "name": "JOHN PAUL S BONOTAN",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 150,
+    "plate": "60K-020",
+    "name": "Jerome R Paule",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 151,
+    "plate": "60K-022",
+    "name": "Aldrin Lumba Galang",
+    "dist": "60km",
+    "size": "L",
+    "team": "Bikers",
+    "claimed": false
+  },
+  {
+    "id": 152,
+    "plate": "60K-023",
+    "name": "John Nijinskie A Guerrero",
+    "dist": "60km",
+    "size": "S",
+    "team": "Jinskie",
+    "claimed": false
+  },
+  {
+    "id": 153,
+    "plate": "60K-024",
+    "name": "Michaelangelo Ting",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Ting",
+    "claimed": false
+  },
+  {
+    "id": 154,
+    "plate": "60K-025",
+    "name": "Manilyn Ting",
+    "dist": "60km",
+    "size": "L",
+    "team": "Ting",
+    "claimed": false
+  },
+  {
+    "id": 155,
+    "plate": "60K-026",
+    "name": "Ivan Kenneth Banal Letran",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 156,
+    "plate": "60K-027",
+    "name": "Christian Jason V Cornel",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Lods Motoventure",
+    "claimed": false
+  },
+  {
+    "id": 157,
+    "plate": "60K-028",
+    "name": "Jeceal B Agnote",
+    "dist": "60km",
+    "size": "S",
+    "team": "Lods Motoventure",
+    "claimed": false
+  },
+  {
+    "id": 158,
+    "plate": "60K-029",
+    "name": "Marie Franz Eugenio Escolastico",
+    "dist": "60km",
+    "size": "2XS",
+    "team": "The KooKoos",
+    "claimed": false
+  },
+  {
+    "id": 159,
+    "plate": "60K-030",
+    "name": "Ann-Jillin Aquino Santos",
+    "dist": "60km",
+    "size": "S",
+    "team": "The KooKoos",
+    "claimed": false
+  },
+  {
+    "id": 160,
+    "plate": "60K-031",
+    "name": "Mitch Ilagan",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 161,
+    "plate": "60K-032",
+    "name": "Jezelle Ditianquin",
+    "dist": "60km",
+    "size": "S",
+    "team": "Dit's",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 162,
+    "plate": "60K-033",
+    "name": "Arnel Ditianquin",
+    "dist": "60km",
+    "size": "L",
+    "team": "Dit's",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 163,
+    "plate": "60K-034",
+    "name": "Christian Anthony P Constantino",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 164,
+    "plate": "60K-035",
+    "name": "Paolo E Aguiluz",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 165,
+    "plate": "60K-036",
+    "name": "Xiaofu Du",
+    "dist": "60km",
+    "size": "M",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 166,
+    "plate": "60K-037",
+    "name": "Jerome Mendeja",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 167,
+    "plate": "60K-039",
+    "name": "Ramonchito Valdes Pekson",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 168,
+    "plate": "60K-040",
+    "name": "Ludy De Leon Lorenzo",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Lorenzo",
+    "claimed": false
+  },
+  {
+    "id": 169,
+    "plate": "60K-041",
+    "name": "Joy Lemuel De Leon Lorenzo",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Lorenzo",
+    "claimed": false
+  },
+  {
+    "id": 170,
+    "plate": "60K-042",
+    "name": "Robert R Apelado",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Apelado",
+    "claimed": false
+  },
+  {
+    "id": 171,
+    "plate": "60K-043",
+    "name": "Goffrey Del Rosario Mallari",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 172,
+    "plate": "60K-046",
+    "name": "Dante Negrosa Cabangcala",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 173,
+    "plate": "60K-053",
+    "name": "Dave Pangilinan Ramos",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 174,
+    "plate": "60K-054",
+    "name": "Arvin M Tolentino",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 175,
+    "plate": "60K-055",
+    "name": "Sean Justin Mesina Recto",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 176,
+    "plate": "60K-056",
+    "name": "Jejomar M Pasamonte",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 177,
+    "plate": "60K-057",
+    "name": "Alexander P Indiongco",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 178,
+    "plate": "60K-058",
+    "name": "Andhrei P Indiongco",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 179,
+    "plate": "60K-059",
+    "name": "Jay Mark Fabian",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 180,
+    "plate": "60K-060",
+    "name": "Patrick Roi Salunga Pidelo",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 181,
+    "plate": "60K-062",
+    "name": "Edwin Dela Fuente",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 182,
+    "plate": "60K-063",
+    "name": "Joel John Siayngco",
+    "dist": "60km",
+    "size": "L",
+    "team": "Joel",
+    "claimed": false
+  },
+  {
+    "id": 183,
+    "plate": "60K-064",
+    "name": "Ferdinand Del Rosario",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 184,
+    "plate": "60K-065",
+    "name": "John Ladian Villagracia",
+    "dist": "60km",
+    "size": "L",
+    "team": "Villagracia",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 185,
+    "plate": "60K-066",
+    "name": "Benjamin Sicam",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Sicam",
+    "claimed": false
+  },
+  {
+    "id": 186,
+    "plate": "60K-075",
+    "name": "Aaron Paul R Valdez",
+    "dist": "60km",
+    "size": "M",
+    "team": "Valdez",
+    "claimed": false
+  },
+  {
+    "id": 187,
+    "plate": "60K-076",
+    "name": "Jero Adam R Valdez",
+    "dist": "60km",
+    "size": "L",
+    "team": "Valdez",
+    "claimed": false
+  },
+  {
+    "id": 188,
+    "plate": "60K-077",
+    "name": "Justine Bryan Dayrit",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 189,
+    "plate": "60K-078",
+    "name": "Felipe G Cappal",
+    "dist": "60km",
+    "size": "S",
+    "team": "Tres Siklo",
+    "claimed": false
+  },
+  {
+    "id": 190,
+    "plate": "60K-079",
+    "name": "James Lester S Bernabe",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Tres Siklo",
+    "claimed": false
+  },
+  {
+    "id": 191,
+    "plate": "60K-080",
+    "name": "Enrico S Pira",
+    "dist": "60km",
+    "size": "S",
+    "team": "Tres Siklo",
+    "claimed": false
+  },
+  {
+    "id": 192,
+    "plate": "60K-081",
+    "name": "Henry Cañada",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 193,
+    "plate": "60K-082",
+    "name": "Edison G Yap",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 194,
+    "plate": "60K-085",
+    "name": "Wilfred Lorenzo Loresca Dizon",
+    "dist": "60km",
+    "size": "XS",
+    "team": "The Dizons",
+    "claimed": false
+  },
+  {
+    "id": 195,
+    "plate": "60K-086",
+    "name": "Wilfredo Tacipit Dizon",
+    "dist": "60km",
+    "size": "L",
+    "team": "The Dizons",
+    "claimed": false
+  },
+  {
+    "id": 196,
+    "plate": "60K-090",
+    "name": "Patricia Carreon",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Carreons",
+    "claimed": false
+  },
+  {
+    "id": 197,
+    "plate": "60K-091",
+    "name": "Kevin Carreon",
+    "dist": "60km",
+    "size": "S",
+    "team": "Carreons",
+    "claimed": false
+  },
+  {
+    "id": 198,
+    "plate": "60K-092",
+    "name": "Mc Joseph A Maquera",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 199,
+    "plate": "60K-103",
+    "name": "Remm Joseph V Balingit",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 200,
+    "plate": "60K-105",
+    "name": "Justin Hope Castillo Villegas",
+    "dist": "60km",
+    "size": "M",
+    "team": "Dokitos",
+    "claimed": false
+  },
+  {
+    "id": 201,
+    "plate": "60K-106",
+    "name": "Tyron Edward Tibayan Regalado",
+    "dist": "60km",
+    "size": "L",
+    "team": "Dokitos",
+    "claimed": false
+  },
+  {
+    "id": 202,
+    "plate": "60K-107",
+    "name": "Ted Edward Tibayan Regalado",
+    "dist": "60km",
+    "size": "L",
+    "team": "Dokitos",
+    "claimed": false
+  },
+  {
+    "id": 203,
+    "plate": "60K-109",
+    "name": "Francis R Baetiong",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 204,
+    "plate": "60K-112",
+    "name": "Ian Anthony P Constantino",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 205,
+    "plate": "60K-113",
+    "name": "Ryan Hernandez Marquez",
+    "dist": "60km",
+    "size": "5XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 206,
+    "plate": "60K-114",
+    "name": "Anne Manalo",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 207,
+    "plate": "60K-115",
+    "name": "Rolando P Camacho",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 208,
+    "plate": "60K-116",
+    "name": "Clarence Ioakim T Sy",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Traveling Tangs",
+    "claimed": false
+  },
+  {
+    "id": 209,
+    "plate": "60K-117",
+    "name": "Nathan Joseph T Cu",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Traveling Tangs",
+    "claimed": false
+  },
+  {
+    "id": 210,
+    "plate": "60K-118",
+    "name": "Arnold T Bernardo",
+    "dist": "60km",
+    "size": "XL",
+    "team": "CIIS",
+    "claimed": false
+  },
+  {
+    "id": 211,
+    "plate": "60K-121",
+    "name": "Daniel Claudio Norman Brown",
+    "dist": "60km",
+    "size": "3XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 212,
+    "plate": "60K-122",
+    "name": "Jake Salvador P Corcuera",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 213,
+    "plate": "60K-123",
+    "name": "Joshua Abellar Yoilan",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 214,
+    "plate": "60K-124",
+    "name": "RICHARD J Taacon",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 215,
+    "plate": "60K-125",
+    "name": "Daryll M Menta",
+    "dist": "60km",
+    "size": "S",
+    "team": "Budol",
+    "claimed": false
+  },
+  {
+    "id": 216,
+    "plate": "60K-126",
+    "name": "Lorilyn A Gonzales",
+    "dist": "60km",
+    "size": "S",
+    "team": "Budol",
+    "claimed": false
+  },
+  {
+    "id": 217,
+    "plate": "60K-129",
+    "name": "Seth Evangelista Quillayen",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 218,
+    "plate": "60K-130",
+    "name": "Clariza Tan",
+    "dist": "60km",
+    "size": "S",
+    "team": "PC",
+    "claimed": false
+  },
+  {
+    "id": 219,
+    "plate": "60K-131",
+    "name": "Pocholo Nebres",
+    "dist": "60km",
+    "size": "XS",
+    "team": "PC",
+    "claimed": false
+  },
+  {
+    "id": 220,
+    "plate": "60K-132",
+    "name": "Czyrell Manalastas Panganiban",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 221,
+    "plate": "60K-133",
+    "name": "Marie Elloise Manuel",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 222,
+    "plate": "60K-134",
+    "name": "Gian Karlo Bagui",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 223,
+    "plate": "60K-135",
+    "name": "Maia M Antonio",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 224,
+    "plate": "60K-136",
+    "name": "Allen Giofer Urnieta",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 225,
+    "plate": "60K-137",
+    "name": "Gerardo Bundalian Tua",
+    "dist": "60km",
+    "size": "L",
+    "team": "Tua",
+    "claimed": false
+  },
+  {
+    "id": 226,
+    "plate": "60K-138",
+    "name": "Rodolfo Bernardo Panlilio Rivera",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 227,
+    "plate": "60K-139",
+    "name": "Bernard Baluyot Nacianceno",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 228,
+    "plate": "60K-140",
+    "name": "Titanium Andin",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 229,
+    "plate": "60K-141",
+    "name": "Edwin Fernandez",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 230,
+    "plate": "60K-142",
+    "name": "Christian Manankil",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 231,
+    "plate": "60K-143",
+    "name": "Zach Manuel Beaniza",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 232,
+    "plate": "60K-144",
+    "name": "Desmond Lim",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 233,
+    "plate": "60K-146",
+    "name": "VINCE PELAYO ALANO",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Alano",
+    "claimed": false
+  },
+  {
+    "id": 234,
+    "plate": "60K-147",
+    "name": "Marky Manalang",
+    "dist": "60km",
+    "size": "L",
+    "team": "Skeletal Spinners",
+    "claimed": false
+  },
+  {
+    "id": 235,
+    "plate": "60K-148",
+    "name": "Lester Sarasua",
+    "dist": "60km",
+    "size": "5XL",
+    "team": "Skeletal Spinners",
+    "claimed": false
+  },
+  {
+    "id": 236,
+    "plate": "60K-149",
+    "name": "Marvic Manalang",
+    "dist": "60km",
+    "size": "L",
+    "team": "Skeletal Spinners",
+    "claimed": false
+  },
+  {
+    "id": 237,
+    "plate": "60K-150",
+    "name": "JF Santos",
+    "dist": "60km",
+    "size": "4XL",
+    "team": "Skeletal Spinners",
+    "claimed": false
+  },
+  {
+    "id": 238,
+    "plate": "60K-151",
+    "name": "Allan V Lansangan",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 239,
+    "plate": "60K-152",
+    "name": "Carl Dondie Muni Suboc",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 240,
+    "plate": "60K-157",
+    "name": "Widmark Panlilio",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 241,
+    "plate": "60K-158",
+    "name": "Patrick O Villanueva",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 242,
+    "plate": "60K-160",
+    "name": "Arvin Caampued Rosal",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 243,
+    "plate": "60K-161",
+    "name": "Michael Ryan Fajura Siscar",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 244,
+    "plate": "60K-166",
+    "name": "Al Gerome Oda Bondoc",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 245,
+    "plate": "60K-167",
+    "name": "Rocky Belmes Capati",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 246,
+    "plate": "60K-170",
+    "name": "L.A. Reyes Ganzon",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 247,
+    "plate": "60K-171",
+    "name": "Marco Macatangay",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 248,
+    "plate": "60K-172",
+    "name": "Johnrey Luzon",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 249,
+    "plate": "60K-173",
+    "name": "Joy Janna Ong Chuyaco",
+    "dist": "60km",
+    "size": "L",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 250,
+    "plate": "60K-174",
+    "name": "Victor Ochavillo Tanhehco",
+    "dist": "60km",
+    "size": "XL",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 251,
+    "plate": "60K-176",
+    "name": "John Paul Bisnar Abriam",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 252,
+    "plate": "60K-177",
+    "name": "Jerome Soriano Dayrit",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 253,
+    "plate": "60K-178",
+    "name": "Renen D. Belen",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 254,
+    "plate": "60K-179",
+    "name": "Jomar DC Silvestre",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 255,
+    "plate": "60K-180",
+    "name": "LUDWICKE BAJO CLEMENTE",
+    "dist": "60km",
+    "size": "XL",
+    "team": "CLEMENTE FAMILIA",
+    "claimed": false
+  },
+  {
+    "id": 256,
+    "plate": "60K-181",
+    "name": "LUTGARDO S CLEMENTE",
+    "dist": "60km",
+    "size": "XL",
+    "team": "CLEMENTE FAMILIA",
+    "claimed": false
+  },
+  {
+    "id": 257,
+    "plate": "60K-182",
+    "name": "KYLE DATUIN",
+    "dist": "60km",
+    "size": "M",
+    "team": "CLEMENTE FAMILIA",
+    "claimed": false
+  },
+  {
+    "id": 258,
+    "plate": "60K-183",
+    "name": "LERVICKE B CLEMENTE",
+    "dist": "60km",
+    "size": "XL",
+    "team": "CLEMENTE FAMILIA",
+    "claimed": false
+  },
+  {
+    "id": 259,
+    "plate": "60K-193",
+    "name": "Jeffrey L REYES",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Esco Cycling Club",
+    "claimed": false
+  },
+  {
+    "id": 260,
+    "plate": "60K-194",
+    "name": "Jacob Albert E REYES",
+    "dist": "60km",
+    "size": "S",
+    "team": "Esco Cycling Club",
+    "claimed": false
+  },
+  {
+    "id": 261,
+    "plate": "60K-195",
+    "name": "Maria Kristina Camille E Reyes",
+    "dist": "60km",
+    "size": "M",
+    "team": "Esco Cycling Club",
+    "claimed": false
+  },
+  {
+    "id": 262,
+    "plate": "60K-196",
+    "name": "Jess Delos Santos Palmario",
+    "dist": "60km",
+    "size": "M",
+    "team": "Palmario",
+    "claimed": false
+  },
+  {
+    "id": 263,
+    "plate": "60K-202",
+    "name": "Francis David Nicdao",
+    "dist": "60km",
+    "size": "XL",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 264,
+    "plate": "60K-203",
+    "name": "Melvin Bulanadi Gomez",
+    "dist": "60km",
+    "size": "XL",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 265,
+    "plate": "60K-204",
+    "name": "Wendelle Suba Gulapa",
+    "dist": "60km",
+    "size": "L",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 266,
+    "plate": "60K-205",
+    "name": "Jay Carpio Santos",
+    "dist": "60km",
+    "size": "M",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 267,
+    "plate": "60K-206",
+    "name": "Peter Andrew Soriano Galang",
+    "dist": "60km",
+    "size": "M",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 268,
+    "plate": "60K-207",
+    "name": "Lee Anthony Macapagal Abrio",
+    "dist": "60km",
+    "size": "XL",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 269,
+    "plate": "60K-208",
+    "name": "Randolf Paul Canivel Evangelista",
+    "dist": "60km",
+    "size": "L",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 270,
+    "plate": "60K-209",
+    "name": "Arnel P De Guia",
+    "dist": "60km",
+    "size": "XL",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 271,
+    "plate": "60K-210",
+    "name": "Ernani C. Flores",
+    "dist": "60km",
+    "size": "3XL",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 272,
+    "plate": "60K-211",
+    "name": "Reynold David Susa",
+    "dist": "60km",
+    "size": "M",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 273,
+    "plate": "60K-212",
+    "name": "Emelito Aquino Pineda",
+    "dist": "60km",
+    "size": "L",
+    "team": "wheeler Boyz",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 274,
+    "plate": "60K-214",
+    "name": "Rafael James Gorospe",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 275,
+    "plate": "60K-215",
+    "name": "Jojit R De Leon",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 276,
+    "plate": "60K-220",
+    "name": "Antero Jr. D MAPPANG",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Solid North Bikers",
+    "claimed": false
+  },
+  {
+    "id": 277,
+    "plate": "60K-221",
+    "name": "Esteban Cay-as Gondales",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Solid North Bikers",
+    "claimed": false
+  },
+  {
+    "id": 278,
+    "plate": "60K-222",
+    "name": "Joemer Gondales Serrano",
+    "dist": "60km",
+    "size": "L",
+    "team": "Solid North Bikers",
+    "claimed": false
+  },
+  {
+    "id": 279,
+    "plate": "60K-223",
+    "name": "Evan Lance C Li Liao",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 280,
+    "plate": "60K-224",
+    "name": "Benjie C Delizo",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 281,
+    "plate": "60K-226",
+    "name": "Edward Zacarias Bangit",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 282,
+    "plate": "60K-227",
+    "name": "Adrian Gesim Laxamana",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 283,
+    "plate": "60K-228",
+    "name": "Joana Marie Tadeo",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 284,
+    "plate": "60K-230",
+    "name": "James Luis Flores Canilao",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 285,
+    "plate": "60K-231",
+    "name": "Elleazar Soriano",
+    "dist": "60km",
+    "size": "L",
+    "team": "Gala on Gears",
+    "claimed": false
+  },
+  {
+    "id": 286,
+    "plate": "60K-232",
+    "name": "Ronielle John Rivera",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Gala on Gears",
+    "claimed": false
+  },
+  {
+    "id": 287,
+    "plate": "60K-233",
+    "name": "Giliane Mae P Garcia",
+    "dist": "60km",
+    "size": "M",
+    "team": "Gala on Gears",
+    "claimed": false
+  },
+  {
+    "id": 288,
+    "plate": "60K-234",
+    "name": "Shannon Andrei Twaño",
+    "dist": "60km",
+    "size": "3XL",
+    "team": "Gala on Gears",
+    "claimed": false
+  },
+  {
+    "id": 289,
+    "plate": "60K-235",
+    "name": "Christine Garcia",
+    "dist": "60km",
+    "size": "M",
+    "team": "Gala on Gears",
+    "claimed": false
+  },
+  {
+    "id": 290,
+    "plate": "60K-236",
+    "name": "Julius Sabas",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 291,
+    "plate": "60K-237",
+    "name": "Geraldine Notarion Tadle",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 292,
+    "plate": "60K-239",
+    "name": "Jandee Nikolai C. Friginal",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 293,
+    "plate": "60K-240",
+    "name": "Simon Pavel Tapia Miranda",
+    "dist": "60km",
+    "size": "L",
+    "team": "Tukod.Ph",
+    "claimed": false
+  },
+  {
+    "id": 294,
+    "plate": "60K-241",
+    "name": "Reuben Raphael Tapia Miranda",
+    "dist": "60km",
+    "size": "M",
+    "team": "Tukod.Ph",
+    "claimed": false
+  },
+  {
+    "id": 295,
+    "plate": "60K-242",
+    "name": "Rene Jose Miranda",
+    "dist": "60km",
+    "size": "M",
+    "team": "Tukod.Ph",
+    "claimed": false
+  },
+  {
+    "id": 296,
+    "plate": "60K-243",
+    "name": "Doodsie Mallari Salang Doodsie Mallari",
+    "dist": "60km",
+    "size": "S",
+    "team": "Tukod.Ph",
+    "claimed": false
+  },
+  {
+    "id": 297,
+    "plate": "60K-244",
+    "name": "Mharben II S Durupan",
+    "dist": "60km",
+    "size": "L",
+    "team": "Johhnie Bikers",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 298,
+    "plate": "60K-245",
+    "name": "Neil Jasper P Layug",
+    "dist": "60km",
+    "size": "M",
+    "team": "Johhnie Bikers",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 299,
+    "plate": "60K-246",
+    "name": "Arlan James C Casugod",
+    "dist": "60km",
+    "size": "M",
+    "team": "Johhnie Bikers",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 300,
+    "plate": "60K-247",
+    "name": "Noreen M Bucsit",
+    "dist": "60km",
+    "size": "M",
+    "team": "Johhnie Bikers",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 301,
+    "plate": "60K-248",
+    "name": "Jun Breta Pontanos",
+    "dist": "60km",
+    "size": "XL",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 302,
+    "plate": "60K-250",
+    "name": "Romell James Cruz Kalalang",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 303,
+    "plate": "60K-254",
+    "name": "Enrique Torio",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 304,
+    "plate": "60K-257",
+    "name": "JOHNPAUL GEORGE URCIA BAYLON",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 305,
+    "plate": "60K-258",
+    "name": "Arianne Marie Fenol Ebora",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 306,
+    "plate": "60K-259",
+    "name": "Joseph Mancuso",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 307,
+    "plate": "60K-260",
+    "name": "Sean Brian Dacillo",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 308,
+    "plate": "60K-261",
+    "name": "Edward Jr. Villamael Pizarro",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Slow Sunday Club",
+    "claimed": false
+  },
+  {
+    "id": 309,
+    "plate": "60K-262",
+    "name": "Chirstian Villamael Pizarro",
+    "dist": "60km",
+    "size": "L",
+    "team": "Slow Sunday Club",
+    "claimed": false
+  },
+  {
+    "id": 310,
+    "plate": "60K-263",
+    "name": "Carlo Albert Mendoza Cabrera",
+    "dist": "60km",
+    "size": "M",
+    "team": "Slow Sunday Club",
+    "claimed": false
+  },
+  {
+    "id": 311,
+    "plate": "60K-264",
+    "name": "Paolo Ocampo",
+    "dist": "60km",
+    "size": "L",
+    "team": "Slow Sunday Club",
+    "claimed": false
+  },
+  {
+    "id": 312,
+    "plate": "60K-265",
+    "name": "Dale Diwa Pineda",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Slow Sunday Club",
+    "claimed": false
+  },
+  {
+    "id": 313,
+    "plate": "60K-266",
+    "name": "Mark Renz Feruelo Lorejo",
+    "dist": "60km",
+    "size": "M",
+    "team": "Lorejo Group",
+    "claimed": false
+  },
+  {
+    "id": 314,
+    "plate": "60K-267",
+    "name": "Fritz Dhynzell T Miranda",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Lorejo Group",
+    "claimed": false
+  },
+  {
+    "id": 315,
+    "plate": "60K-268",
+    "name": "Joy Lumanlan",
+    "dist": "60km",
+    "size": "L",
+    "team": "RJ cycling",
+    "claimed": false
+  },
+  {
+    "id": 316,
+    "plate": "60K-269",
+    "name": "Ron Co",
+    "dist": "60km",
+    "size": "M",
+    "team": "RJ cycling",
+    "claimed": false
+  },
+  {
+    "id": 317,
+    "plate": "60K-270",
+    "name": "Ren R Canilao",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 318,
+    "plate": "60K-271",
+    "name": "Martin T Lopez",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 319,
+    "plate": "60K-272",
+    "name": "Chester Nacino Macabunga",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 320,
+    "plate": "60K-273",
+    "name": "Raven Gian M Banal",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Devan",
+    "claimed": false
+  },
+  {
+    "id": 321,
+    "plate": "60K-274",
+    "name": "Steven Jireh M Banal",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Devan",
+    "claimed": false
+  },
+  {
+    "id": 322,
+    "plate": "60K-275",
+    "name": "Terence John L. Libut",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 323,
+    "plate": "60K-276",
+    "name": "Socrates Cuaresma Ariola",
+    "dist": "60km",
+    "size": "XS",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 324,
+    "plate": "60K-277",
+    "name": "Donald Genilo Delegencia",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 325,
+    "plate": "60K-280",
+    "name": "Feleciano G Buenavista",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 326,
+    "plate": "60K-281",
+    "name": "Retzel Reotutar",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 327,
+    "plate": "60K-282",
+    "name": "Arnel Banzon Calaguas Jr.",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 328,
+    "plate": "60K-283",
+    "name": "Edmond A Tabamo",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 329,
+    "plate": "60K-284",
+    "name": "James B Fernando",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 330,
+    "plate": "60K-285",
+    "name": "Primitivo D Cabillas Jr",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 331,
+    "plate": "60K-286",
+    "name": "MANUEL J CAJOTE JR",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 332,
+    "plate": "60K-287",
+    "name": "Davidson L Calsiw",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 333,
+    "plate": "60K-288",
+    "name": "Sonny L Casuga",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 334,
+    "plate": "60K-289",
+    "name": "Adrian G Guiao",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 335,
+    "plate": "60K-290",
+    "name": "Billy Joe T Tuvera",
+    "dist": "60km",
+    "size": "L",
+    "team": "BiGi’s",
+    "claimed": false
+  },
+  {
+    "id": 336,
+    "plate": "60K-291",
+    "name": "Gigi G S",
+    "dist": "60km",
+    "size": "S",
+    "team": "BiGi’s",
+    "claimed": false
+  },
+  {
+    "id": 337,
+    "plate": "60K-292",
+    "name": "Alfie Espino Bañares",
+    "dist": "60km",
+    "size": "3XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 338,
+    "plate": "60K-293",
+    "name": "Earvin O Juco",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 339,
+    "plate": "60K-294",
+    "name": "JASMIN MARY BAUTISTA LOVERO",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 340,
+    "plate": "60K-295",
+    "name": "Justin Carl Mendoza Alvarado",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 341,
+    "plate": "60K-296",
+    "name": "JERSEN O RUBANG",
+    "dist": "60km",
+    "size": "L",
+    "team": "SOLIMAN EC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 342,
+    "plate": "60K-297",
+    "name": "CLINTON JOHN R YANGA",
+    "dist": "60km",
+    "size": "XL",
+    "team": "SOLIMAN EC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 343,
+    "plate": "60K-298",
+    "name": "CHARLES KERBY O RUBANG",
+    "dist": "60km",
+    "size": "M",
+    "team": "SOLIMAN EC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 344,
+    "plate": "60K-299",
+    "name": "JERSEN O RUBANG JR",
+    "dist": "60km",
+    "size": "S",
+    "team": "SOLIMAN EC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 345,
+    "plate": "60K-300",
+    "name": "JOSEPH CHRISTIAN M SARMIENTO",
+    "dist": "60km",
+    "size": "L",
+    "team": "SOLIMAN EC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 346,
+    "plate": "60K-301",
+    "name": "JUSTINE M SARMIENTO",
+    "dist": "60km",
+    "size": "M",
+    "team": "SOLIMAN EC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 347,
+    "plate": "60K-302",
+    "name": "QUIN ZEDRICK L PANGAN",
+    "dist": "60km",
+    "size": "M",
+    "team": "SOLIMAN EC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 348,
+    "plate": "60K-303",
+    "name": "IAN GEFORD C BANATE",
+    "dist": "60km",
+    "size": "L",
+    "team": "SOLIMAN EC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 349,
+    "plate": "60K-304",
+    "name": "JEAN PIERRE M SARMIENTO",
+    "dist": "60km",
+    "size": "M",
+    "team": "SOLIMAN EC",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 350,
+    "plate": "60K-305",
+    "name": "Sheryl F Fajardo",
+    "dist": "60km",
+    "size": "L",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 351,
+    "plate": "60K-306",
+    "name": "Julian Gabriel Martinez Torres",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 352,
+    "plate": "60K-307",
+    "name": "Bernardo Bayona Cruz Jr",
+    "dist": "60km",
+    "size": "XL",
+    "team": "BnC",
+    "claimed": false
+  },
+  {
+    "id": 353,
+    "plate": "60K-308",
+    "name": "Clarissa Rivera Regio",
+    "dist": "60km",
+    "size": "L",
+    "team": "BnC",
+    "claimed": false
+  },
+  {
+    "id": 354,
+    "plate": "60K-309",
+    "name": "Angelie Cruz Garcia",
+    "dist": "60km",
+    "size": "4XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 355,
+    "plate": "60K-310",
+    "name": "Reinerio III Montebon Garcia",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 356,
+    "plate": "60K-311",
+    "name": "Aldrin Dizon Ramos",
+    "dist": "60km",
+    "size": "XL",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 357,
+    "plate": "60K-312",
+    "name": "Jerald Lee Letran",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 358,
+    "plate": "60K-313",
+    "name": "Alex N Ramos",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 359,
+    "plate": "60K-314",
+    "name": "Mannix Chua",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 360,
+    "plate": "60K-315",
+    "name": "Carey Leh Kohchet Chua",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 361,
+    "plate": "60K-316",
+    "name": "Crisologo B Bibat",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 362,
+    "plate": "60K-317",
+    "name": "Ronaldo R Angeles",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 363,
+    "plate": "60K-318",
+    "name": "Frankie Lee Sy",
+    "dist": "60km",
+    "size": "4XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 364,
+    "plate": "60K-319",
+    "name": "Emerson Magpantay Esparrago",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 365,
+    "plate": "60K-320",
+    "name": "Bernadette A Herrera",
+    "dist": "60km",
+    "size": "XS",
+    "team": "CRZ (Cruz Control Multisport)",
+    "claimed": false
+  },
+  {
+    "id": 366,
+    "plate": "60K-321",
+    "name": "Ethan C Nikolovski",
+    "dist": "60km",
+    "size": "M",
+    "team": "CRZ (Cruz Control Multisport)",
+    "claimed": false
+  },
+  {
+    "id": 367,
+    "plate": "60K-322",
+    "name": "Carlo C Herrera",
+    "dist": "60km",
+    "size": "XS",
+    "team": "CRZ (Cruz Control Multisport)",
+    "claimed": false
+  },
+  {
+    "id": 368,
+    "plate": "60K-323",
+    "name": "Clark Ej Hernandez Basa",
+    "dist": "60km",
+    "size": "3XL",
+    "team": "Team Mauaque Bikers",
+    "claimed": false
+  },
+  {
+    "id": 369,
+    "plate": "60K-324",
+    "name": "Charles Ian Hernandez Basa",
+    "dist": "60km",
+    "size": "S",
+    "team": "Team Mauaque Bikers",
+    "claimed": false
+  },
+  {
+    "id": 370,
+    "plate": "60K-325",
+    "name": "Roestam John Bautista",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 371,
+    "plate": "60K-326",
+    "name": "Reymundo Albania Alvarez",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 372,
+    "plate": "60K-327",
+    "name": "Karlo Malimban Bautista",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 373,
+    "plate": "60K-328",
+    "name": "Abraham Aaron Campo Sales",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 374,
+    "plate": "60K-329",
+    "name": "Gian Carlo Cancio Garcia",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": true,
+    "prepared": true,
+    "preparedAt": "2026-09-24 05:00 PM",
+    "claimedAt": "2026-09-24 05:00 PM"
+  },
+  {
+    "id": 375,
+    "plate": "60K-330",
+    "name": "Anabelle Galang Sanchez",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 376,
+    "plate": "60K-331",
+    "name": "Ren Bang Bang Yu",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 377,
+    "plate": "60K-332",
+    "name": "Allen Sampang",
+    "dist": "60km",
+    "size": "S",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 378,
+    "plate": "60K-333",
+    "name": "Mark Bradley A Salcedo",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 379,
+    "plate": "60K-334",
+    "name": "Benigno R Pajela",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 380,
+    "plate": "60K-335",
+    "name": "Jayrold Joshua Garcia",
+    "dist": "60km",
+    "size": "M",
+    "team": "AJ",
+    "claimed": false
+  },
+  {
+    "id": 381,
+    "plate": "60K-336",
+    "name": "Maria Ahrbinne Fernando",
+    "dist": "60km",
+    "size": "L",
+    "team": "AJ",
+    "claimed": false
+  },
+  {
+    "id": 382,
+    "plate": "60K-337",
+    "name": "Ric Allan Breta Pontanos",
+    "dist": "60km",
+    "size": "XL",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 383,
+    "plate": "60K-338",
+    "name": "Allan Cristino B Rosal",
+    "dist": "60km",
+    "size": "XL",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 384,
+    "plate": "60K-339",
+    "name": "Jenard C Gamilla",
+    "dist": "60km",
+    "size": "M",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 385,
+    "plate": "60K-340",
+    "name": "Edzell Dizon Pacia",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 386,
+    "plate": "60K-341",
+    "name": "Christopher Llobrera Torio",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 387,
+    "plate": "60K-342",
+    "name": "Michael Andre A Chu",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 388,
+    "plate": "60K-343",
+    "name": "Giovanni C Bautista",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 389,
+    "plate": "60K-344",
+    "name": "Philip Andrei Sanchez Malang",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 390,
+    "plate": "60K-345",
+    "name": "Patrik Lendl F Cambronero",
+    "dist": "60km",
+    "size": "S",
+    "team": "RoadRatz",
+    "claimed": false
+  },
+  {
+    "id": 391,
+    "plate": "60K-346",
+    "name": "Yul J Urbina",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "RoadRatz",
+    "claimed": false
+  },
+  {
+    "id": 392,
+    "plate": "60K-347",
+    "name": "Calvin Roy Patiag",
+    "dist": "60km",
+    "size": "M",
+    "team": "RoadRatz",
+    "claimed": false
+  },
+  {
+    "id": 393,
+    "plate": "60K-348",
+    "name": "Michael Roriguez",
+    "dist": "60km",
+    "size": "L",
+    "team": "RoadRatz",
+    "claimed": false
+  },
+  {
+    "id": 394,
+    "plate": "60K-349",
+    "name": "Emerson Micumao Villanoza",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 395,
+    "plate": "60K-350",
+    "name": "Ian M Soriaga",
+    "dist": "60km",
+    "size": "S",
+    "team": "OLLC2K1",
+    "claimed": false
+  },
+  {
+    "id": 396,
+    "plate": "60K-351",
+    "name": "Julius P Alfafara",
+    "dist": "60km",
+    "size": "M",
+    "team": "OLLC2K1",
+    "claimed": false
+  },
+  {
+    "id": 397,
+    "plate": "60K-352",
+    "name": "Dennis Dan Jaime Gerella",
+    "dist": "60km",
+    "size": "S",
+    "team": "OLLC2K1",
+    "claimed": false
+  },
+  {
+    "id": 398,
+    "plate": "60K-353",
+    "name": "Andrew C Samson",
+    "dist": "60km",
+    "size": "M",
+    "team": "OLLC2K1",
+    "claimed": false
+  },
+  {
+    "id": 399,
+    "plate": "60K-354",
+    "name": "John Robert Uson Ferreria",
+    "dist": "60km",
+    "size": "M",
+    "team": "OLLC2K1",
+    "claimed": false
+  },
+  {
+    "id": 400,
+    "plate": "60K-355",
+    "name": "ManuelGozales De Jesus",
+    "dist": "60km",
+    "size": "L",
+    "team": "Tito Manny & Friends",
+    "claimed": false
+  },
+  {
+    "id": 401,
+    "plate": "60K-356",
+    "name": "Ryan Jasper Agcaoili Diego",
+    "dist": "60km",
+    "size": "M",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 402,
+    "plate": "60K-357",
+    "name": "Robert Jr. Lingbanan Herman",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 403,
+    "plate": "60K-358",
+    "name": "John Jacob L Pajela",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 404,
+    "plate": "60K-359",
+    "name": "Peter Lawrence Salvador Viloria",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 405,
+    "plate": "60K-360",
+    "name": "Donald Waco Talaro Aniwasal",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 406,
+    "plate": "60K-361",
+    "name": "Jerome R Bayani",
+    "dist": "60km",
+    "size": "M",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 407,
+    "plate": "60K-362",
+    "name": "Bertwin T Co Chay Lay",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 408,
+    "plate": "60K-363",
+    "name": "Marcus Benedict G Co Chay Lay",
+    "dist": "60km",
+    "size": "L",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 409,
+    "plate": "60K-364",
+    "name": "Einar De Jesus Salle",
+    "dist": "60km",
+    "size": "L",
+    "team": "Tito Manny & Friends",
+    "claimed": false
+  },
+  {
+    "id": 410,
+    "plate": "60K-365",
+    "name": "Jhun Rhey E Fullero",
+    "dist": "60km",
+    "size": "XS",
+    "team": "None",
+    "claimed": false
+  },
+  {
+    "id": 411,
+    "plate": "60K-366",
+    "name": "Hong Geun Lee",
+    "dist": "60km",
+    "size": "L",
+    "team": "Hungle",
+    "claimed": false
+  },
+  {
+    "id": 412,
+    "plate": "60K-367",
+    "name": "Sungyoon Lee",
+    "dist": "60km",
+    "size": "M",
+    "team": "Hungle",
+    "claimed": false
+  },
+  {
+    "id": 413,
+    "plate": "60K-368",
+    "name": "Jan Kristoffer Valencia Diolata",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 414,
+    "plate": "60K-369",
+    "name": "Taewoo Kim",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 415,
+    "plate": "60K-370",
+    "name": "Jose Vicente Aguas",
+    "dist": "60km",
+    "size": "2XL",
+    "team": "Individual / None",
+    "claimed": false
+  },
+  {
+    "id": 416,
+    "plate": "60K-437",
+    "name": "Benjie Manalastas",
+    "dist": "60km",
+    "size": "S",
+    "team": "CDC",
+    "claimed": false
+  },
+  {
+    "id": 417,
+    "plate": "60K-438",
+    "name": "Mark Pojas",
+    "dist": "60km",
+    "size": "M",
+    "team": "CDC",
+    "claimed": false
+  },
+  {
+    "id": 418,
+    "plate": "60K-439",
+    "name": "Rommel Fernandez",
+    "dist": "60km",
+    "size": "M",
+    "team": "CDC",
+    "claimed": false
+  },
+  {
+    "id": 419,
+    "plate": "60K-440",
+    "name": "Edwin Santos",
+    "dist": "60km",
+    "size": "M",
+    "team": "CDC",
+    "claimed": false
+  },
+  {
+    "id": 420,
+    "plate": "60K-441",
+    "name": "Erwin Pattaui",
+    "dist": "60km",
+    "size": "XL",
+    "team": "CDC",
+    "claimed": false
+  },
+  {
+    "id": 421,
+    "plate": "60K-442",
+    "name": "Renan Meneses",
+    "dist": "60km",
+    "size": "XL",
+    "team": "CDC",
+    "claimed": false
+  },
+  {
+    "id": 422,
+    "plate": "60K-443",
+    "name": "Ramon Meneses",
+    "dist": "60km",
+    "size": "S",
+    "team": "CDC",
+    "claimed": false
+  },
+  {
+    "id": 423,
+    "plate": "60K-444",
+    "name": "Nicol Brian Lee",
+    "dist": "60km",
+    "size": "M",
+    "team": "Complimentary",
+    "claimed": false
+  },
+  {
+    "id": 424,
+    "plate": "60K-445",
+    "name": "Victor Edwin Salas",
+    "dist": "60km",
+    "size": "S",
+    "team": "Complimentary",
+    "claimed": false
+  },
+  {
+    "id": 425,
+    "plate": "60K-446",
+    "name": "Kiko Abante",
+    "dist": "60km",
+    "size": "S",
+    "team": "Complimentary",
+    "claimed": false
+  },
+  {
+    "id": 426,
+    "plate": "60K-447",
+    "name": "Valerie De Guzman",
+    "dist": "60km",
+    "size": "M",
+    "team": "Complimentary",
+    "claimed": false
+  },
+  {
+    "id": 427,
+    "plate": "60K-448",
+    "name": "Pamela Ruth L. Perfecto",
+    "dist": "60km",
+    "size": "S",
+    "team": "Complimentary",
+    "claimed": false
+  },
+  {
+    "id": 428,
+    "plate": "60K-449",
+    "name": "Princess Faye Bautista",
+    "dist": "60km",
+    "size": "S",
+    "team": "Complimentary",
+    "claimed": false
+  },
+  {
+    "id": 429,
+    "plate": "60K-450",
+    "name": "Genard Reyes",
+    "dist": "60km",
+    "size": "XL",
+    "team": "Complimentary",
+    "claimed": false
+  }
+];
+
+    // CSV Text Parser Engine
+    function parseCSVData(csvText) {
+      if (!csvText) return null;
+      const lines = csvText.split(/\r?\n/).filter(line => line.trim().length > 0);
+      if (lines.length < 2) return null;
+
+      const parseLine = (line) => {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+              current += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (char === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        result.push(current.trim());
+        return result;
+      };
+
+      const headers = parseLine(lines[0]).map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+      
+      const findIdx = (keywords) => {
+        return headers.findIndex(h => keywords.some(k => h.includes(k)));
+      };
+
+      const plateIdx = findIdx(['plate', 'bib']);
+      const nameIdx = findIdx(['name', 'rider']);
+      const distIdx = findIdx(['dist']);
+      const sizeIdx = findIdx(['size', 'jersey']);
+      const teamIdx = findIdx(['group', 'team', 'club']);
+      const prepIdx = findIdx(['preparedstatus', 'prepared']);
+      const prepAtIdx = findIdx(['preparedat']);
+      const claimIdx = findIdx(['claimedstatus', 'claimstatus', 'claim']);
+      const claimAtIdx = findIdx(['claimedat']);
+
+      const parsedParticipants = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseLine(lines[i]);
+        if (!cols || cols.length === 0) continue;
+
+        const plate = plateIdx !== -1 ? cols[plateIdx] : `RIDER-${i}`;
+        const name = nameIdx !== -1 ? cols[nameIdx] : 'Unknown';
+        const dist = distIdx !== -1 ? cols[distIdx] : '30km';
+        const size = sizeIdx !== -1 ? cols[sizeIdx] : 'M';
+        const team = teamIdx !== -1 ? cols[teamIdx] : 'Individual / None';
+        
+        const prepStr = prepIdx !== -1 ? cols[prepIdx].toLowerCase() : '';
+        const isPrepared = prepStr.includes('prepared') || prepStr === 'true' || prepStr === 'yes';
+        const prepAt = prepAtIdx !== -1 ? cols[prepAtIdx] : '';
+
+        const claimStr = claimIdx !== -1 ? cols[claimIdx].toLowerCase() : '';
+        const isClaimed = claimStr.includes('claimed') || claimStr === 'true' || claimStr === 'yes';
+        const claimAt = claimAtIdx !== -1 ? cols[claimAtIdx] : '';
+
+        parsedParticipants.push({
+          id: i,
+          plate: plate || `RIDER-${i}`,
+          name: name || 'Participant',
+          dist: dist || '30km',
+          size: size || 'M',
+          team: team || 'Individual / None',
+          prepared: isPrepared,
+          preparedAt: prepAt || undefined,
+          claimed: isClaimed,
+          claimedAt: claimAt || undefined
+        });
+      }
+
+      return parsedParticipants.length > 0 ? parsedParticipants : null;
+    }
+
+    
+    let isPolling = false;
+
+    async function pollServerSync() {
+      if (isPolling) return;
+      isPolling = true;
+      try {
+        const res = await fetch('/api/load?t=' + Date.now());
+        if (res.ok) {
+          const csvText = await res.text();
+          const parsed = parseCSVData(csvText);
+          if (parsed && parsed.length > 0) {
+            let hasChanges = false;
+            if (state.participants.length !== parsed.length) {
+              hasChanges = true;
+            } else {
+              for (let i = 0; i < parsed.length; i++) {
+                const cur = state.participants[i];
+                const srv = parsed[i];
+                if (!cur || cur.prepared !== srv.prepared || cur.claimed !== srv.claimed || cur.claimedAt !== srv.claimedAt || cur.preparedAt !== srv.preparedAt) {
+                  hasChanges = true;
+                  break;
+                }
+              }
+            }
+
+            if (hasChanges) {
+              state.participants = parsed;
+              try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state.participants));
+              } catch (e) {}
+              populateGroupFilterOptions();
+              applyFiltersAndSort();
+              console.log('[Live Network Sync] Synced latest changes from server disk!');
+            }
+          }
+        }
+      } catch (e) {
+        // Standalone offline mode
+      } finally {
+        isPolling = false;
+      }
+    }
+
+    // Initialize Application
+    async function init() {
+      initTheme();
+      loadLocalStorage();
+
+      // Attempt to load live CSV file from server folder
+      try {
+        const res = await fetch('/api/load');
+        if (res.ok) {
+          const csvText = await res.text();
+          const parsed = parseCSVData(csvText);
+          if (parsed && parsed.length > 0) {
+            state.participants = parsed;
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(state.participants));
+            } catch (e) {}
+            console.log(`[CSV Disk Sync] Loaded ${parsed.length} participants from participants.csv!`);
+          }
+        }
+      } catch (e) {
+        console.log('[CSV Disk Sync] Local server offline, loaded from browser cache.');
+      }
+
+      if (!state.participants || state.participants.length === 0) {
+        state.participants = JSON.parse(JSON.stringify(DEMO_PARTICIPANTS));
+        saveLocalStorage();
+      }
+
+      populateGroupFilterOptions();
+      setupEventListeners();
+      applyFiltersAndSort();
+      setInterval(pollServerSync, 2000);
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('ctr4_theme');
+      if (savedTheme === 'dark') {
+        state.darkTheme = true;
+        document.body.classList.add('dark-theme');
+        DOM.themeIconSun.style.display = 'none';
+        DOM.themeIconMoon.style.display = 'block';
+      } else {
+        state.darkTheme = false;
+        document.body.classList.remove('dark-theme');
+        DOM.themeIconSun.style.display = 'block';
+        DOM.themeIconMoon.style.display = 'none';
+      }
+    }
+
+    let serverSaveTimeout = null;
+
+    function saveLocalStorage() {
+      // 1. Save locally in browser
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.participants));
+      } catch (e) {
+        showToast('Error saving data to local storage', 'danger');
+      }
+
+      // 2. Automatically save directly to participants.csv on disk
+      if (serverSaveTimeout) clearTimeout(serverSaveTimeout);
+      serverSaveTimeout = setTimeout(() => {
+        fetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participants: state.participants })
+        })
+        .then(res => res.json())
+        .then(data => {
+          console.log('[CSV Disk Sync] Successfully updated participants.csv on folder disk.');
+        })
+        .catch(err => {
+          console.log('[CSV Disk Sync] Running in standalone offline mode.');
+        });
+      }, 150);
+    }
+
+    function loadLocalStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          state.participants = JSON.parse(raw);
+        }
+      } catch (e) {
+        console.error('Failed to parse localStorage', e);
+        state.participants = [];
+      }
+    }
+
+    // Populate Group Dropdown Options
+    function populateGroupFilterOptions() {
+      const groups = new Set();
+      state.participants.forEach(p => {
+        if (p.team && p.team.trim()) {
+          groups.add(p.team.trim());
+        }
+      });
+
+      const currentVal = state.filters.group;
+      DOM.groupFilterSelect.innerHTML = '<option value="ALL">All Groups & Batches</option>';
+      
+      Array.from(groups).sort().forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g;
+        opt.textContent = g;
+        if (g === currentVal) opt.selected = true;
+        DOM.groupFilterSelect.appendChild(opt);
+      });
+    }
+
+    // Advanced Search & Group Range Parser
+    function parseSearchQuery(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) return { type: 'NONE' };
+
+      const rangeMatch = q.match(/^(?:30k-|60k-)?(\d+)\s*-\s*(?:30k-|60k-)?(\d+)$/i);
+      if (rangeMatch) {
+        const min = parseInt(rangeMatch[1], 10);
+        const max = parseInt(rangeMatch[2], 10);
+        return {
+          type: 'RANGE',
+          min: Math.min(min, max),
+          max: Math.max(min, max)
+        };
+      }
+
+      if (q.includes(',')) {
+        const plates = q.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+        return { type: 'MULTI_PLATE', plates };
+      }
+
+      return { type: 'TEXT', query: q };
+    }
+
+    function isMatchSearch(participant, parsedQuery) {
+      if (parsedQuery.type === 'NONE') return true;
+
+      const plateStr = String(participant.plate || '').trim();
+      const parts = plateStr.split('-');
+      const bibNum = parts.length > 1 ? parseInt(parts[1].replace(/\D/g, ''), 10) : parseInt(plateStr.replace(/\D/g, ''), 10);
+
+      if (parsedQuery.type === 'RANGE') {
+        if (!isNaN(bibNum)) {
+          return bibNum >= parsedQuery.min && bibNum <= parsedQuery.max;
+        }
+        return false;
+      }
+
+      if (parsedQuery.type === 'MULTI_PLATE') {
+        return parsedQuery.plates.some(p => plateStr.toLowerCase() === p || plateStr.toLowerCase().includes(p));
+      }
+
+      const name = String(participant.name || '').toLowerCase();
+      const team = String(participant.team || '').toLowerCase();
+      const dist = String(participant.dist || '').toLowerCase();
+      const size = String(participant.size || '').toLowerCase();
+      const q = parsedQuery.query;
+
+      return plateStr.toLowerCase().includes(q) ||
+             name.includes(q) ||
+             team.includes(q) ||
+             dist.includes(q) ||
+             size.includes(q);
+    }
+
+    // Filter and Sort Engine
+    function applyFiltersAndSort() {
+      const parsedQuery = parseSearchQuery(state.filters.search);
+
+      // 1. Filtering
+      let indices = [];
+      state.participants.forEach((p, idx) => {
+        // Group Filter
+        if (state.filters.group !== 'ALL' && String(p.team || '').trim() !== state.filters.group) {
+          return;
+        }
+
+        // Distance filter
+        if (state.filters.dist !== 'ALL' && String(p.dist).toUpperCase() !== state.filters.dist.toUpperCase()) {
+          return;
+        }
+
+        // Status filter
+        if (state.filters.status === 'CLAIMED' && !p.claimed) return;
+        if (state.filters.status === 'PREPARED' && !p.prepared) return;
+        if (state.filters.status === 'PENDING' && (p.claimed || p.prepared)) return;
+
+        // Size filter
+        if (state.filters.size !== 'ALL' && String(p.size).toUpperCase() !== state.filters.size.toUpperCase()) {
+          return;
+        }
+
+        // Search match
+        if (!isMatchSearch(p, parsedQuery)) return;
+
+        indices.push(idx);
+      });
+
+      // 2. Sorting
+      const sizeOrder = { 'XS': 1, 'S': 2, 'M': 3, 'L': 4, 'XL': 5, '2XL': 6, '3XL': 7 };
+      indices.sort((a, b) => {
+        const pA = state.participants[a];
+        const pB = state.participants[b];
+
+        if (state.sortBy === 'group') {
+          const gA = String(pA.team || 'Unassigned');
+          const gB = String(pB.team || 'Unassigned');
+          const cmp = gA.localeCompare(gB);
+          if (cmp !== 0) return cmp;
+        }
+
+        if (state.sortBy === 'plate-asc') {
+          const numA = parseInt(String(pA.plate).replace(/\D/g, ''), 10) || 0;
+          const numB = parseInt(String(pB.plate).replace(/\D/g, ''), 10) || 0;
+          return numA - numB;
+        }
+        if (state.sortBy === 'plate-desc') {
+          const numA = parseInt(String(pA.plate).replace(/\D/g, ''), 10) || 0;
+          const numB = parseInt(String(pB.plate).replace(/\D/g, ''), 10) || 0;
+          return numB - numA;
+        }
+        if (state.sortBy === 'size') {
+          const sA = sizeOrder[String(pA.size).toUpperCase()] || 99;
+          const sB = sizeOrder[String(pB.size).toUpperCase()] || 99;
+          return sA - sB;
+        }
+        if (state.sortBy === 'name') {
+          return String(pA.name).localeCompare(String(pB.name));
+        }
+        if (state.sortBy === 'status-pending') {
+          return (pA.claimed ? 2 : (pA.prepared ? 1 : 0)) - (pB.claimed ? 2 : (pB.prepared ? 1 : 0));
+        }
+        return 0;
+      });
+
+      state.filteredIndices = indices;
+
+      if (state.focusedIndex >= indices.length) {
+        state.focusedIndex = Math.max(0, indices.length - 1);
+      }
+
+      // Update active mobile filter badge
+      const hasActiveFilters = state.filters.group !== 'ALL' || state.filters.dist !== 'ALL' || state.filters.status !== 'ALL' || state.filters.size !== 'ALL';
+      if (DOM.mobileFilterBadge) {
+        DOM.mobileFilterBadge.style.display = hasActiveFilters ? 'inline-block' : 'none';
+      }
+
+      renderStats();
+      renderDisplay();
+    }
+
+    function renderStats() {
+      const total = state.participants.length;
+      const prepared = state.participants.filter(p => p.prepared).length;
+      const claimed = state.participants.filter(p => p.claimed).length;
+      const pending = state.participants.filter(p => !p.claimed && !p.prepared).length;
+      const pct = total > 0 ? Math.round((claimed / total) * 100) : 0;
+
+      DOM.statTotal.textContent = total;
+      if (DOM.statPrepared) DOM.statPrepared.textContent = prepared;
+      DOM.statClaimed.textContent = claimed;
+      DOM.statPending.textContent = pending;
+      DOM.statProgressFill.style.width = pct + '%';
+
+      DOM.resultsCount.innerHTML = `Showing <strong>${state.filteredIndices.length}</strong> of <strong>${total}</strong> participants`;
+    }
+
+    // Render Flat Grid, Grouped View, or Table List View
+    function renderDisplay() {
+      if (state.filteredIndices.length === 0) {
+        DOM.displayContainer.innerHTML = '';
+        DOM.emptyState.style.display = 'flex';
+        if (state.participants.length === 0) {
+          DOM.emptyTitle.textContent = 'No Data Loaded';
+          DOM.emptyDesc.textContent = 'Click "Import CSV" above to load participants.';
+        } else {
+          DOM.emptyTitle.textContent = 'No Matching Participants';
+          DOM.emptyDesc.textContent = 'Try adjusting your search range or filter criteria.';
+        }
+        return;
+      }
+
+      DOM.emptyState.style.display = 'none';
+      DOM.displayContainer.innerHTML = '';
+
+      if (state.viewMode === 'GRID') {
+        const grid = document.createElement('div');
+        grid.className = 'participant-grid';
+        state.filteredIndices.forEach((origIdx, viewIdx) => {
+          const card = createCardElement(origIdx, viewIdx);
+          grid.appendChild(card);
+        });
+        DOM.displayContainer.appendChild(grid);
+      } else if (state.viewMode === 'GROUPED') {
+        const groupsMap = new Map();
+        state.filteredIndices.forEach((origIdx, viewIdx) => {
+          const p = state.participants[origIdx];
+          const groupName = (p.team && p.team.trim()) ? p.team.trim() : 'Unassigned Group';
+          if (!groupsMap.has(groupName)) {
+            groupsMap.set(groupName, []);
+          }
+          groupsMap.get(groupName).push({ origIdx, viewIdx });
+        });
+
+        groupsMap.forEach((items, groupName) => {
+          const section = document.createElement('div');
+          section.className = 'group-section';
+
+          const header = document.createElement('div');
+          header.className = 'group-header';
+          header.innerHTML = `
+            <div class="group-title-text">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              <span>${escapeHtml(groupName)}</span>
+            </div>
+            <span class="group-count-badge">${items.length} Participant${items.length > 1 ? 's' : ''}</span>
+          `;
+          section.appendChild(header);
+
+          const grid = document.createElement('div');
+          grid.className = 'participant-grid';
+          items.forEach(item => {
+            const card = createCardElement(item.origIdx, item.viewIdx);
+            grid.appendChild(card);
+          });
+          section.appendChild(grid);
+
+          DOM.displayContainer.appendChild(section);
+        });
+      } else if (state.viewMode === 'TABLE') {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'participant-table-wrapper';
+
+        const table = document.createElement('table');
+        table.className = 'participant-table';
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Plate #</th>
+              <th>Participant Name</th>
+              <th>Size</th>
+              <th>Distance</th>
+              <th>Group / Team</th>
+              <th>Prepared Status</th>
+              <th>Claimed Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+
+        state.filteredIndices.forEach((origIdx, viewIdx) => {
+          const row = createTableRowElement(origIdx, viewIdx);
+          tbody.appendChild(row);
+        });
+
+        wrapper.appendChild(table);
+        DOM.displayContainer.appendChild(wrapper);
+      }
+
+      scrollToFocusedCard();
+    }
+
+    // Card DOM Factory
+    function createCardElement(origIdx, viewIdx) {
+      const p = state.participants[origIdx];
+      const isFocused = viewIdx === state.focusedIndex;
+      const card = document.createElement('div');
+      card.className = `participant-card ${p.claimed ? 'claimed' : (p.prepared ? 'prepared' : '')} ${isFocused ? 'focused' : ''}`;
+      card.dataset.index = origIdx;
+      card.dataset.viewIndex = viewIdx;
+      card.tabIndex = 0;
+
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="plate-number-box">
+            <span class="plate-label">Plate / Bib</span>
+            <span class="card-plate">#${escapeHtml(p.plate)}</span>
+          </div>
+          <!-- HUGE PROMINENT SIZE BADGE -->
+          <div class="size-badge-large" title="Jersey Size: ${escapeHtml(p.size)}">
+            ${escapeHtml(p.size || 'N/A')}
+          </div>
+        </div>
+        <div class="card-info">
+          <div class="card-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</div>
+          <div class="card-meta-row">
+            <span class="dist-badge">${escapeHtml(p.dist || 'Default')}</span>
+            ${p.team ? `<span class="group-badge" title="Group: ${escapeHtml(p.team)}">${escapeHtml(p.team)}</span>` : ''}
+            ${p.prepared && !p.claimed ? `<span class="prepared-badge" title="Kit Prepared at ${escapeHtml(p.preparedAt || '')}">✓ Prepared ${p.preparedAt ? '('+escapeHtml(p.preparedAt)+')' : ''}</span>` : ''}
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span>${p.claimed ? 'CLAIMED' : (p.prepared ? 'PREPARED' : 'PENDING')}</span>
+          </div>
+          <div class="card-actions-row">
+            <button class="btn-status-toggle btn-prepared-toggle" data-action="toggle-prepared" title="Toggle Kit Prepared Status">
+              <span>${p.prepared ? '✓ Prepared' : '📦 Prepare'}</span>
+            </button>
+            <button class="btn-status-toggle btn-claim-toggle" data-action="toggle-claim" title="Toggle Kit Claimed Status">
+              <svg class="checkmark-svg" viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>${p.claimed ? 'Claimed' : 'Mark Claimed'}</span>
+            </button>
+          </div>
+        </div>
+        ${p.claimedAt ? `<div class="claimed-timestamp">Claimed at ${escapeHtml(p.claimedAt)}</div>` : ''}
+      `;
+
+      card.addEventListener('click', (e) => {
+        setFocusedIndex(viewIdx);
+        if (e.target.closest('[data-action="toggle-prepared"]')) {
+          togglePreparedStatus(origIdx);
+        } else if (e.target.closest('[data-action="toggle-claim"]')) {
+          toggleClaimStatus(origIdx);
+        }
+      });
+
+      return card;
+    }
+
+    // Table Row DOM Factory
+    function createTableRowElement(origIdx, viewIdx) {
+      const p = state.participants[origIdx];
+      const isFocused = viewIdx === state.focusedIndex;
+      const tr = document.createElement('tr');
+      tr.className = `${p.claimed ? 'claimed' : (p.prepared ? 'prepared' : '')} ${isFocused ? 'focused' : ''}`;
+      tr.dataset.index = origIdx;
+      tr.dataset.viewIndex = viewIdx;
+
+      tr.innerHTML = `
+        <td><span class="table-plate">#${escapeHtml(p.plate)}</span></td>
+        <td><strong>${escapeHtml(p.name)}</strong></td>
+        <td><span class="table-size-badge">${escapeHtml(p.size || 'N/A')}</span></td>
+        <td><span class="dist-badge">${escapeHtml(p.dist || 'Default')}</span></td>
+        <td>${p.team ? `<span class="group-badge">${escapeHtml(p.team)}</span>` : '<span style="color:var(--text-dim)">-</span>'}</td>
+        <td>
+          ${p.prepared ? `<span class="prepared-badge">✓ Prepared ${p.preparedAt ? '('+escapeHtml(p.preparedAt)+')' : ''}</span>` : '<span style="color:var(--text-dim)">Pending</span>'}
+        </td>
+        <td>
+          ${p.claimed ? `<span style="color:var(--status-claimed); font-weight:800;">✓ Claimed ${p.claimedAt ? '('+escapeHtml(p.claimedAt)+')' : ''}</span>` : '<span style="color:var(--accent-orange); font-weight:700;">Pending</span>'}
+        </td>
+        <td>
+          <div class="card-actions-row">
+            <button class="btn-status-toggle btn-prepared-toggle" data-action="toggle-prepared" title="Toggle Prepared">
+              <span>${p.prepared ? '✓ Prepared' : '📦 Prepare'}</span>
+            </button>
+            <button class="btn-status-toggle btn-claim-toggle" data-action="toggle-claim" title="Toggle Claimed">
+              <span>${p.claimed ? '✓ Claimed' : 'Mark Claimed'}</span>
+            </button>
+          </div>
+        </td>
+      `;
+
+      tr.addEventListener('click', (e) => {
+        setFocusedIndex(viewIdx);
+        if (e.target.closest('[data-action="toggle-prepared"]')) {
+          togglePreparedStatus(origIdx);
+        } else if (e.target.closest('[data-action="toggle-claim"]')) {
+          toggleClaimStatus(origIdx);
+        }
+      });
+
+      return tr;
+    }
+
+    function setFocusedIndex(idx) {
+      state.focusedIndex = idx;
+      const elements = DOM.displayContainer.querySelectorAll('.participant-card, .participant-table tbody tr');
+      elements.forEach((el) => {
+        const vIdx = parseInt(el.dataset.viewIndex, 10);
+        if (vIdx === idx) {
+          el.classList.add('focused');
+        } else {
+          el.classList.remove('focused');
+        }
+      });
+      scrollToFocusedCard();
+    }
+
+    function scrollToFocusedCard() {
+      const elements = DOM.displayContainer.querySelectorAll('.participant-card, .participant-table tbody tr');
+      let targetEl = null;
+      elements.forEach(el => {
+        if (parseInt(el.dataset.viewIndex, 10) === state.focusedIndex) {
+          targetEl = el;
+        }
+      });
+      if (targetEl) {
+        targetEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+
+    function getFormattedTimestamp(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+      return `${year}-${month}-${day} ${timeStr}`;
+    }
+
+    // Toggle Kit Prepared Status
+    function togglePreparedStatus(origIdx) {
+      const p = state.participants[origIdx];
+      if (!p) return;
+
+      p.prepared = !p.prepared;
+      if (p.prepared) {
+        p.preparedAt = getFormattedTimestamp();
+        playSound('claim');
+        showToast(`Kit for Plate #${p.plate} (${p.name}) marked as PREPARED`, 'info');
+      } else {
+        delete p.preparedAt;
+        if (!p.claimed) {
+          playSound('unclaim');
+        }
+        showToast(`Kit for Plate #${p.plate} (${p.name}) marked as NOT PREPARED`, 'info');
+      }
+
+      saveLocalStorage();
+      applyFiltersAndSort();
+    }
+
+    // Toggle Claim Status
+    function toggleClaimStatus(origIdx) {
+      const p = state.participants[origIdx];
+      if (!p) return;
+
+      p.claimed = !p.claimed;
+      if (p.claimed) {
+        p.prepared = true;
+        if (!p.preparedAt) {
+          p.preparedAt = getFormattedTimestamp();
+        }
+        p.claimedAt = getFormattedTimestamp();
+        playSound('claim');
+        showToast(`Plate #${p.plate} (${p.name}) marked as CLAIMED`, 'success');
+      } else {
+        delete p.claimedAt;
+        playSound('unclaim');
+        showToast(`Plate #${p.plate} (${p.name}) marked as UNCLAIMED`, 'info');
+      }
+
+      saveLocalStorage();
+      applyFiltersAndSort();
+    }
+
+    // Toggle BOTH Prepared & Claimed Status (One-Touch Action)
+    function toggleBothPreparedAndClaimedStatus(origIdx) {
+      const p = state.participants[origIdx];
+      if (!p) return;
+
+      const timeStr = getFormattedTimestamp();
+
+      if (p.claimed && p.prepared) {
+        p.claimed = false;
+        p.prepared = false;
+        delete p.claimedAt;
+        delete p.preparedAt;
+        playSound('unclaim');
+        showToast(`Plate #${p.plate} (${p.name}) reset to PENDING`, 'info');
+      } else {
+        p.prepared = true;
+        p.preparedAt = p.preparedAt || timeStr;
+        p.claimed = true;
+        p.claimedAt = timeStr;
+        playSound('claim');
+        showToast(`Plate #${p.plate} (${p.name}) marked PREPARED & CLAIMED`, 'success');
+      }
+
+      saveLocalStorage();
+      applyFiltersAndSort();
+    }
+
+    // Instant Search Action (Enter Key inside Search Box)
+    function executeSearchInstantAction(e = {}) {
+      if (state.filteredIndices.length > 0) {
+        const targetIdx = state.filteredIndices[state.focusedIndex] !== undefined 
+          ? state.filteredIndices[state.focusedIndex] 
+          : state.filteredIndices[0];
+
+        if (targetIdx !== undefined) {
+          if (e.shiftKey) {
+            togglePreparedStatus(targetIdx);
+          } else if (e.altKey || e.ctrlKey) {
+            toggleClaimStatus(targetIdx);
+          } else {
+            toggleBothPreparedAndClaimedStatus(targetIdx);
+          }
+          if (DOM.searchInput) {
+            DOM.searchInput.focus();
+            DOM.searchInput.select();
+          }
+        }
+      } else {
+        showToast('No matching participant found to claim', 'info');
+      }
+    }
+
+    // Event Listeners
+    function setupEventListeners() {
+      // Search Input Instant Claim Action (Enter Key or Quick Button)
+      DOM.searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          executeSearchInstantAction(e);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          DOM.searchInput.blur();
+          if (state.filteredIndices.length > 0) {
+            setFocusedIndex(0);
+          }
+        }
+      });
+
+      if (DOM.btnSearchMarkBoth) {
+        DOM.btnSearchMarkBoth.addEventListener('click', () => {
+          executeSearchInstantAction();
+        });
+      }
+
+      // Mobile Filters Toggle Drawer Handler
+      if (DOM.btnToggleFilters && DOM.sidebarFiltersDrawer) {
+        DOM.btnToggleFilters.addEventListener('click', () => {
+          DOM.sidebarFiltersDrawer.classList.toggle('open');
+          const isOpen = DOM.sidebarFiltersDrawer.classList.contains('open');
+          DOM.btnToggleFilters.classList.toggle('active', isOpen);
+          if (DOM.toggleFilterText) {
+            DOM.toggleFilterText.textContent = isOpen ? 'Hide Filters & Options' : 'Show Filters & Options';
+          }
+        });
+      }
+
+      // Global Keydown Handler
+      document.addEventListener('keydown', (e) => {
+        const isSearchFocused = document.activeElement === DOM.searchInput;
+
+        if (e.key === '/' && !isSearchFocused) {
+          e.preventDefault();
+          DOM.searchInput.focus();
+          DOM.searchInput.select();
+          return;
+        }
+
+        if (e.key === 'Escape') {
+          if (isSearchFocused) {
+            DOM.searchInput.blur();
+          } else if (state.filters.search) {
+            clearSearch();
+          }
+          return;
+        }
+
+        if (!isSearchFocused && state.filteredIndices.length > 0) {
+          if (e.key === ' ' || e.code === 'Space') {
+            e.preventDefault();
+            const origIdx = state.filteredIndices[state.focusedIndex];
+            if (origIdx !== undefined) {
+              toggleClaimStatus(origIdx);
+            }
+            return;
+          }
+
+          if (e.key === 'p' || e.key === 'P') {
+            e.preventDefault();
+            const origIdx = state.filteredIndices[state.focusedIndex];
+            if (origIdx !== undefined) {
+              togglePreparedStatus(origIdx);
+            }
+            return;
+          }
+
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const origIdx = state.filteredIndices[state.focusedIndex];
+            if (origIdx !== undefined) {
+              toggleBothPreparedAndClaimedStatus(origIdx);
+              const nextIdx = Math.min(state.focusedIndex + 1, state.filteredIndices.length - 1);
+              setFocusedIndex(nextIdx);
+            }
+            return;
+          }
+
+          if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+            e.preventDefault();
+            const nextIdx = Math.min(state.focusedIndex + 1, state.filteredIndices.length - 1);
+            setFocusedIndex(nextIdx);
+            return;
+          }
+
+          if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            const prevIdx = Math.max(state.focusedIndex - 1, 0);
+            setFocusedIndex(prevIdx);
+            return;
+          }
+        }
+      });
+
+      // Search Input
+      DOM.searchInput.addEventListener('input', (e) => {
+        state.filters.search = e.target.value;
+        DOM.searchClear.style.display = e.target.value ? 'block' : 'none';
+        DOM.searchKbdHint.style.display = e.target.value ? 'none' : 'block';
+        state.focusedIndex = 0;
+        applyFiltersAndSort();
+      });
+
+      DOM.searchClear.addEventListener('click', clearSearch);
+
+      // Group Filter Select
+      DOM.groupFilterSelect.addEventListener('change', (e) => {
+        state.filters.group = e.target.value;
+        state.focusedIndex = 0;
+        applyFiltersAndSort();
+      });
+
+      // Quick Ranges
+      document.querySelectorAll('.quick-range-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const range = chip.dataset.range;
+          DOM.searchInput.value = range;
+          state.filters.search = range;
+          DOM.searchClear.style.display = 'block';
+          DOM.searchKbdHint.style.display = 'none';
+          state.focusedIndex = 0;
+          applyFiltersAndSort();
+        });
+      });
+
+      // Filter Chips Click
+      document.querySelectorAll('.chip-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type = btn.dataset.filterType;
+          const val = btn.dataset.value;
+
+          btn.parentElement.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active', 'active-orange'));
+          btn.classList.add(type === 'status' && val === 'PENDING' ? 'active-orange' : 'active');
+
+          state.filters[type] = val;
+          state.focusedIndex = 0;
+          applyFiltersAndSort();
+        });
+      });
+
+      // View Mode Toggle (Grid vs Grouped vs Table)
+      DOM.btnViewGrid.addEventListener('click', () => {
+        state.viewMode = 'GRID';
+        DOM.btnViewGrid.classList.add('active');
+        DOM.btnViewGrouped.classList.remove('active');
+        DOM.btnViewTable.classList.remove('active');
+        renderDisplay();
+      });
+
+      DOM.btnViewGrouped.addEventListener('click', () => {
+        state.viewMode = 'GROUPED';
+        DOM.btnViewGrouped.classList.add('active');
+        DOM.btnViewGrid.classList.remove('active');
+        DOM.btnViewTable.classList.remove('active');
+        renderDisplay();
+      });
+
+      DOM.btnViewTable.addEventListener('click', () => {
+        state.viewMode = 'TABLE';
+        DOM.btnViewTable.classList.add('active');
+        DOM.btnViewGrid.classList.remove('active');
+        DOM.btnViewGrouped.classList.remove('active');
+        renderDisplay();
+      });
+
+      // Sort Select
+      DOM.sortSelect.addEventListener('change', (e) => {
+        state.sortBy = e.target.value;
+        applyFiltersAndSort();
+      });
+
+      // Import CSV Button
+      DOM.btnImport.addEventListener('click', () => {
+        DOM.fileInput.click();
+      });
+
+      DOM.fileInput.addEventListener('change', handleFileImport);
+
+      // Export CSV Button
+      DOM.btnExport.addEventListener('click', exportCSV);
+
+      // Audio Toggle
+      DOM.btnAudioToggle.addEventListener('click', () => {
+        state.audioEnabled = !state.audioEnabled;
+        DOM.audioIconOn.style.display = state.audioEnabled ? 'block' : 'none';
+        DOM.audioIconOff.style.display = state.audioEnabled ? 'none' : 'block';
+        showToast(`Sound feedback ${state.audioEnabled ? 'enabled' : 'disabled'}`, 'info');
+      });
+
+      // Theme Toggle (Light / Dark Mode)
+      DOM.btnThemeToggle.addEventListener('click', () => {
+        state.darkTheme = !state.darkTheme;
+        if (state.darkTheme) {
+          document.body.classList.add('dark-theme');
+          DOM.themeIconSun.style.display = 'none';
+          DOM.themeIconMoon.style.display = 'block';
+          localStorage.setItem('ctr4_theme', 'dark');
+          showToast('Switched to Dark Theme', 'info');
+        } else {
+          document.body.classList.remove('dark-theme');
+          DOM.themeIconSun.style.display = 'block';
+          DOM.themeIconMoon.style.display = 'none';
+          localStorage.setItem('ctr4_theme', 'light');
+          showToast('Switched to Bright Light Theme', 'info');
+        }
+      });
+    }
+
+    function clearSearch() {
+      DOM.searchInput.value = '';
+      state.filters.search = '';
+      DOM.searchClear.style.display = 'none';
+      DOM.searchKbdHint.style.display = 'block';
+      state.focusedIndex = 0;
+      applyFiltersAndSort();
+      DOM.searchInput.focus();
+    }
+
+    // CSV Parser
+    function parseCSV(text) {
+      const lines = [];
+      let row = [];
+      let inQuotes = false;
+      let currentVal = '';
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"') {
+          if (inQuotes && nextChar === '"') {
+            currentVal += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          row.push(currentVal.trim());
+          currentVal = '';
+        } else if ((char === '\r' || char === '\n') && !inQuotes) {
+          if (char === '\r' && nextChar === '\n') i++;
+          row.push(currentVal.trim());
+          if (row.some(val => val.length > 0)) {
+            lines.push(row);
+          }
+          row = [];
+          currentVal = '';
+        } else {
+          currentVal += char;
+        }
+      }
+      if (currentVal || row.length > 0) {
+        row.push(currentVal.trim());
+        if (row.some(val => val.length > 0)) {
+          lines.push(row);
+        }
+      }
+      return lines;
+    }
+
+    function handleFileImport(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const text = evt.target.result;
+          const rows = parseCSV(text);
+
+          if (rows.length < 2) {
+            showToast('Invalid CSV format or empty file', 'danger');
+            return;
+          }
+
+          const headers = rows[0].map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+          
+          const findColIndex = (candidates) => {
+            return headers.findIndex(h => candidates.some(c => h.includes(c)));
+          };
+
+          const plateIdx = findColIndex(['plate', 'bib', 'number', 'id', 'code']);
+          const nameIdx = findColIndex(['name', 'participant', 'athlete', 'fullname']);
+          const distIdx = findColIndex(['dist', 'category', 'route', 'km']);
+          const sizeIdx = findColIndex(['size', 'jersey', 'shirt', 'tshirt']);
+          const teamIdx = findColIndex(['team', 'group', 'batch', 'club']);
+          const preparedIdx = findColIndex(['prepared', 'ready', 'packed']);
+          const claimedIdx = findColIndex(['claimed', 'status', 'picked', 'pickup']);
+
+          const imported = [];
+          for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || r.length === 0) continue;
+
+            const plate = plateIdx !== -1 && r[plateIdx] ? r[plateIdx] : String(i);
+            const name = nameIdx !== -1 && r[nameIdx] ? r[nameIdx] : `Participant ${i}`;
+            const dist = distIdx !== -1 && r[distIdx] ? r[distIdx] : '30km';
+            const size = sizeIdx !== -1 && r[sizeIdx] ? r[sizeIdx].toUpperCase() : 'M';
+            const team = teamIdx !== -1 && r[teamIdx] ? r[teamIdx] : 'Unassigned Group';
+            
+            const preparedRaw = preparedIdx !== -1 && r[preparedIdx] ? r[preparedIdx].toLowerCase() : '';
+            const prepared = preparedRaw === 'true' || preparedRaw === 'prepared' || preparedRaw === 'yes' || preparedRaw === '1';
+
+            const statusRaw = claimedIdx !== -1 && r[claimedIdx] ? r[claimedIdx].toLowerCase() : '';
+            const claimed = statusRaw === 'true' || statusRaw === 'claimed' || statusRaw === 'yes' || statusRaw === '1';
+
+            imported.push({
+              id: Date.now() + i,
+              plate: plate,
+              name: name,
+              dist: dist,
+              size: size,
+              team: team,
+              prepared: prepared || claimed,
+              preparedAt: prepared || claimed ? 'Imported' : undefined,
+              claimed: claimed,
+              claimedAt: claimed ? 'Imported' : undefined
+            });
+          }
+
+          if (imported.length > 0) {
+            state.participants = imported;
+            saveLocalStorage();
+            populateGroupFilterOptions();
+            applyFiltersAndSort();
+            showToast(`Successfully imported ${imported.length} participants!`, 'success');
+          } else {
+            showToast('No valid participant rows found in CSV', 'danger');
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Error parsing CSV file', 'danger');
+        }
+        DOM.fileInput.value = '';
+      };
+
+      reader.readAsText(file);
+    }
+
+    function exportCSV() {
+      if (state.participants.length === 0) {
+        showToast('No participant data to export', 'info');
+        return;
+      }
+
+      const headers = ['Plate Number', 'Name', 'Distance', 'Jersey Size', 'Group / Team', 'Prepared Status', 'Prepared At', 'Claim Status', 'Claimed At'];
+      const rows = state.participants.map(p => [
+        `"${String(p.plate).replace(/"/g, '""')}"`,
+        `"${String(p.name).replace(/"/g, '""')}"`,
+        `"${String(p.dist || '').replace(/"/g, '""')}"`,
+        `"${String(p.size || '').replace(/"/g, '""')}"`,
+        `"${String(p.team || '').replace(/"/g, '""')}"`,
+        p.prepared ? 'Prepared' : 'Pending',
+        `"${String(p.preparedAt || '').replace(/"/g, '""')}"`,
+        p.claimed ? 'Claimed' : 'Pending',
+        `"${String(p.claimedAt || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      const dateStr = new Date().toISOString().slice(0, 10);
+      link.setAttribute('download', `clark_tourism_ride4_pickup_export_${dateStr}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast('Exported CSV file with claim timestamps successfully!', 'success');
+    }
+
+    function showToast(msg, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      DOM.toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.25s ease';
+        setTimeout(() => toast.remove(), 250);
+      }, 2500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
