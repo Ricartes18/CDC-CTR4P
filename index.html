@@ -336,11 +336,11 @@
 
     .search-input {
       width: 100%;
-      background: var(--bg-dark);
+      background: var(--bg-pane);
       border: 2px solid var(--border-subtle);
       border-radius: var(--radius-md);
       padding: 10px 36px 10px 14px;
-      color: #ffffff;
+      color: var(--text-main);
       font-size: 0.95rem;
       font-weight: 500;
       transition: all var(--transition-fast);
@@ -1506,8 +1506,14 @@
           <span class="keyboard-shortcut-hint" id="search-kbd-hint">/</span>
         </div>
         <div class="search-quick-actions" id="search-quick-actions">
-          <button type="button" class="btn-search-action" id="btn-search-mark-both" title="Mark top search result as Prepared & Claimed (Or press Enter key)">
-            ⚡ Mark Prepared & Claimed (Enter)
+          <button type="button" class="btn-search-action" id="btn-search-mark-both" title="Mark top search result as Prepared & Claimed (Enter)">
+            ⚡ Both (Enter)
+          </button>
+          <button type="button" class="btn-search-action" id="btn-search-mark-prepared" title="Mark top search result as Prepared (Shift + Enter)">
+            📦 Prepared (Shift+Enter)
+          </button>
+          <button type="button" class="btn-search-action" id="btn-search-mark-claimed" title="Mark top search result as Claimed (Ctrl + Enter)">
+            ✅ Claimed (Ctrl+Enter)
           </button>
         </div>
         <div class="quick-ranges">
@@ -1576,6 +1582,26 @@
           </div>
         </div>
 
+                <!-- Daily Claims Summary -->
+        <div class="filter-group">
+          <div class="filter-label">Daily Claims Summary</div>
+          <div class="chip-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <button class="chip-btn active" data-filter-type="claimDate" data-value="ALL" style="grid-column: span 2;">All Dates</button>
+            <button class="chip-btn" data-filter-type="claimDate" data-value="9-24" style="text-align: left; display: flex; justify-content: space-between;">
+              <span>9-24:</span><strong id="stat-claim-24" style="color: inherit;">0</strong>
+            </button>
+            <button class="chip-btn" data-filter-type="claimDate" data-value="9-25" style="text-align: left; display: flex; justify-content: space-between;">
+              <span>9-25:</span><strong id="stat-claim-25" style="color: inherit;">0</strong>
+            </button>
+            <button class="chip-btn" data-filter-type="claimDate" data-value="9-26" style="text-align: left; display: flex; justify-content: space-between;">
+              <span>9-26:</span><strong id="stat-claim-26" style="color: inherit;">0</strong>
+            </button>
+            <button class="chip-btn" data-filter-type="claimDate" data-value="9-27" style="text-align: left; display: flex; justify-content: space-between;">
+              <span>9-27:</span><strong id="stat-claim-27" style="color: inherit;">0</strong>
+            </button>
+          </div>
+        </div>
+
         <!-- Keybind Cheat Sheet Panel -->
         <div class="cheat-sheet">
           <div class="cheat-title">
@@ -1585,9 +1611,11 @@
           <div class="cheat-list">
             <div class="cheat-item"><span>Focus Search</span> <kbd>/</kbd></div>
             <div class="cheat-item"><span>Navigate Cards</span> <kbd>&uparrow;</kbd> <kbd>&downarrow;</kbd> or <kbd>&leftarrow;</kbd> <kbd>&rightarrow;</kbd></div>
+            <div class="cheat-item"><span>Mark BOTH (Prepare & Claim)</span> <kbd>Enter</kbd></div>
+            <div class="cheat-item"><span>Mark Prepared Only</span> <kbd>Shift</kbd> + <kbd>Enter</kbd></div>
+            <div class="cheat-item"><span>Mark Claimed Only</span> <kbd>Ctrl</kbd> + <kbd>Enter</kbd></div>
             <div class="cheat-item"><span>Toggle Prepared</span> <kbd>P</kbd></div>
             <div class="cheat-item"><span>Toggle Claimed</span> <kbd>Space</kbd></div>
-            <div class="cheat-item"><span>Mark BOTH (Prepare & Claim)</span> <kbd>Enter</kbd></div>
             <div class="cheat-item"><span>Clear Search</span> <kbd>Esc</kbd></div>
           </div>
         </div>
@@ -1678,7 +1706,8 @@
         group: 'ALL',
         dist: 'ALL',
         status: 'ALL',
-        size: 'ALL'
+        size: 'ALL',
+        claimDate: 'ALL'
       },
       sortBy: 'plate-asc',
       audioEnabled: true
@@ -1690,6 +1719,8 @@
       searchClear: document.getElementById('search-clear'),
       searchKbdHint: document.getElementById('search-kbd-hint'),
       btnSearchMarkBoth: document.getElementById('btn-search-mark-both'),
+      btnSearchMarkPrepared: document.getElementById('btn-search-mark-prepared'),
+      btnSearchMarkClaimed: document.getElementById('btn-search-mark-claimed'),
       groupFilterSelect: document.getElementById('group-filter-select'),
       btnToggleFilters: document.getElementById('btn-toggle-filters'),
       sidebarFiltersDrawer: document.getElementById('sidebar-filters-drawer'),
@@ -1705,6 +1736,10 @@
       statClaimed: document.getElementById('stat-claimed'),
       statPending: document.getElementById('stat-pending'),
       statProgressFill: document.getElementById('stat-progress-fill'),
+      statClaim24: document.getElementById('stat-claim-24'),
+      statClaim25: document.getElementById('stat-claim-25'),
+      statClaim26: document.getElementById('stat-claim-26'),
+      statClaim27: document.getElementById('stat-claim-27'),
       resultsCount: document.getElementById('results-count'),
       sortSelect: document.getElementById('sort-select'),
       btnViewGrid: document.getElementById('btn-view-grid'),
@@ -6221,6 +6256,23 @@
           return;
         }
 
+        // Claim Date filter
+        if (state.filters.claimDate && state.filters.claimDate !== 'ALL') {
+          if (!p.claimed || !p.claimedAt) return;
+          const target = state.filters.claimDate;
+          const parts = target.split('-');
+          if (parts.length === 2) {
+            const mPadded = parts[0].padStart(2, '0');
+            const dPadded = parts[1].padStart(2, '0');
+            const ca = String(p.claimedAt);
+            const matches = ca.includes(`${parts[0]}-${parts[1]}`) ||
+                            ca.includes(`${mPadded}-${dPadded}`) ||
+                            ca.includes(`${parts[0]}/${parts[1]}`) ||
+                            ca.includes(`${mPadded}/${dPadded}`);
+            if (!matches) return;
+          }
+        }
+
         // Search match
         if (!isMatchSearch(p, parsedQuery)) return;
 
@@ -6271,7 +6323,7 @@
       }
 
       // Update active mobile filter badge
-      const hasActiveFilters = state.filters.group !== 'ALL' || state.filters.dist !== 'ALL' || state.filters.status !== 'ALL' || state.filters.size !== 'ALL';
+      const hasActiveFilters = state.filters.group !== 'ALL' || state.filters.dist !== 'ALL' || state.filters.status !== 'ALL' || state.filters.size !== 'ALL' || (state.filters.claimDate && state.filters.claimDate !== 'ALL');
       if (DOM.mobileFilterBadge) {
         DOM.mobileFilterBadge.style.display = hasActiveFilters ? 'inline-block' : 'none';
       }
@@ -6292,6 +6344,21 @@
       DOM.statClaimed.textContent = claimed;
       DOM.statPending.textContent = pending;
       DOM.statProgressFill.style.width = pct + '%';
+
+      let c24 = 0, c25 = 0, c26 = 0, c27 = 0;
+      state.participants.forEach(p => {
+        if (p.claimed && p.claimedAt) {
+          const ca = String(p.claimedAt);
+          if (ca.includes('9-24') || ca.includes('09-24') || ca.includes('9/24') || ca.includes('09/24')) c24++;
+          else if (ca.includes('9-25') || ca.includes('09-25') || ca.includes('9/25') || ca.includes('09/25')) c25++;
+          else if (ca.includes('9-26') || ca.includes('09-26') || ca.includes('9/26') || ca.includes('09/26')) c26++;
+          else if (ca.includes('9-27') || ca.includes('09-27') || ca.includes('9/27') || ca.includes('09/27')) c27++;
+        }
+      });
+      if (DOM.statClaim24) DOM.statClaim24.textContent = c24;
+      if (DOM.statClaim25) DOM.statClaim25.textContent = c25;
+      if (DOM.statClaim26) DOM.statClaim26.textContent = c26;
+      if (DOM.statClaim27) DOM.statClaim27.textContent = c27;
 
       DOM.resultsCount.innerHTML = `Showing <strong>${state.filteredIndices.length}</strong> of <strong>${total}</strong> participants`;
     }
@@ -6562,6 +6629,12 @@
       const p = state.participants[origIdx];
       if (!p) return;
 
+      if (p.claimed) {
+        if (!confirm(`Double Confirmation: Are you sure you want to UNCLAIM the kit for Plate #${p.plate} (${p.name})?`)) {
+          return;
+        }
+      }
+
       p.claimed = !p.claimed;
       if (p.claimed) {
         p.prepared = true;
@@ -6589,6 +6662,9 @@
       const timeStr = getFormattedTimestamp();
 
       if (p.claimed && p.prepared) {
+        if (!confirm(`Double Confirmation: Are you sure you want to UNCLAIM and reset Plate #${p.plate} (${p.name}) to PENDING?`)) {
+          return;
+        }
         p.claimed = false;
         p.prepared = false;
         delete p.claimedAt;
@@ -6654,6 +6730,16 @@
           executeSearchInstantAction();
         });
       }
+      if (DOM.btnSearchMarkPrepared) {
+        DOM.btnSearchMarkPrepared.addEventListener('click', () => {
+          executeSearchInstantAction({ shiftKey: true });
+        });
+      }
+      if (DOM.btnSearchMarkClaimed) {
+        DOM.btnSearchMarkClaimed.addEventListener('click', () => {
+          executeSearchInstantAction({ ctrlKey: true });
+        });
+      }
 
       // Mobile Filters Toggle Drawer Handler
       if (DOM.btnToggleFilters && DOM.sidebarFiltersDrawer) {
@@ -6710,9 +6796,15 @@
             e.preventDefault();
             const origIdx = state.filteredIndices[state.focusedIndex];
             if (origIdx !== undefined) {
-              toggleBothPreparedAndClaimedStatus(origIdx);
-              const nextIdx = Math.min(state.focusedIndex + 1, state.filteredIndices.length - 1);
-              setFocusedIndex(nextIdx);
+              if (e.shiftKey) {
+                togglePreparedStatus(origIdx);
+              } else if (e.ctrlKey || e.metaKey || e.altKey) {
+                toggleClaimStatus(origIdx);
+              } else {
+                toggleBothPreparedAndClaimedStatus(origIdx);
+                const nextIdx = Math.min(state.focusedIndex + 1, state.filteredIndices.length - 1);
+                setFocusedIndex(nextIdx);
+              }
             }
             return;
           }
